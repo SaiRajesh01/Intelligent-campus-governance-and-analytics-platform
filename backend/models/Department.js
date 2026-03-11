@@ -1,4 +1,4 @@
-// Department.js - starter file
+ // Department.js - starter file
 const mongoose = require("mongoose");
 
 const departmentSchema = new mongoose.Schema({
