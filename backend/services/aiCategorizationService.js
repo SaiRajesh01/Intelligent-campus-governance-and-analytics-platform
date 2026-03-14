@@ -1,16 +1,16 @@
 // aiCategorizationService.js - starter file
-// module.exports = async function categorizeComplaint(text) {
+module.exports = async function categorizeComplaint(text) {
 
-//   text = text.toLowerCase();
+  text = text.toLowerCase();
 
-//   if (text.includes("wifi") || text.includes("internet"))
-//     return "IT";
+  if (text.includes("wifi") || text.includes("internet"))
+    return "IT";
 
-//   if (text.includes("hostel"))
-//     return "Hostel";
+  if (text.includes("hostel"))
+    return "Hostel";
 
-//   if (text.includes("library"))
-//     return "Library";
+  if (text.includes("library"))
+    return "Library";
 
-//   return "General";
-// };
+  return "General";
+};
