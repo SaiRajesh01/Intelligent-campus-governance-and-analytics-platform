@@ -5,6 +5,7 @@ const cors = require("cors")
 const connectDB = require("./config/db")
 const departmentRoutes = require("./routes/departmentRoutes")
 const authRoutes = require("./routes/authRoutes")
+const analyticsRoutes = require("./routes/analyticsRoutes")
 
 
 const app = express()
@@ -15,6 +16,7 @@ app.use(cors())
 app.use(express.json())
 app.use("/api/auth",authRoutes)
 app.use("/api/departments", departmentRoutes)
+app.use("/api/analytics",analyticsRoutes)
 
 app.get("/", (req, res) => {
   res.send("Smart Campus Governance API Running")

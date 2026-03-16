@@ -1,16 +1,22 @@
-// aiCategorizationService.js - starter file
-module.exports = async function categorizeComplaint(text) {
+const Department = require("../models/Department");
+
+module.exports = async function aiCategorization(text) {
 
   text = text.toLowerCase();
 
-  if (text.includes("wifi") || text.includes("internet"))
-    return "IT";
+  let deptName;
 
-  if (text.includes("hostel"))
-    return "Hostel";
+  if (text.includes("wifi") || text.includes("internet")) {
+    deptName = "CSE";
+  } 
+  else if (text.includes("lab") || text.includes("system")) {
+    deptName = "A-CSE";
+  } 
+  else {
+    deptName = "CSE";
+  }
 
-  if (text.includes("library"))
-    return "Library";
+  const department = await Department.findOne({ name: deptName });
 
-  return "General";
+  return department._id;
 };
