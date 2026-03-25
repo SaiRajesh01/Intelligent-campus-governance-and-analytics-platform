@@ -1,21 +1,21 @@
  // notificationSocket.js - starter file
-// const socketIO = require("socket.io");
+const socketIO = require("socket.io");
 
-// function initSocket(server) {
+function initSocket(server) {
 
-//   const io = socketIO(server, {
-//     cors: { origin: "*" }
-//   });
+  const io = socketIO(server, {
+    cors: { origin: "*" }
+  });
 
-//   io.on("connection", socket => {
-//     console.log("User connected", socket.id);
+  io.on("connection", socket => {
+    console.log("User connected", socket.id);
 
-//     socket.on("disconnect", () => {
-//       console.log("User disconnected");
-//     });
-//   });
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
+    });
+  });
 
-//   return io;
-// }
+  return io;
+}
 
-// module.exports = initSocket;
+module.exports = initSocket;
