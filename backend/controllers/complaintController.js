@@ -1,4 +1,4 @@
-const Complaint = require("./models/Complaint");
+const Complaint = require("../models/Complaint");
 const aiCategorization = require("../services/aiCategorizationService");
 
 exports.createComplaint = async (req, res) => {
