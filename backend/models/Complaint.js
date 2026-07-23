@@ -51,6 +51,21 @@ const complaintSchema = new mongoose.Schema({
     default: []
   },
 
+  statusHistory: [
+    {
+      from: String,
+      to: String,
+      changedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      },
+      changedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+
   resolvedAt: Date
 
 }, { timestamps: true });
