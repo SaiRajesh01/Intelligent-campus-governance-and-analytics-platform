@@ -2,6 +2,7 @@ require("dotenv").config()
 
 const express = require("express")
 const cors = require("cors")
+const cron = require("node-cron")
 const connectDB = require("./config/db")
 const departmentRoutes = require("./routes/departmentRoutes")
 const authRoutes = require("./routes/authRoutes")
@@ -9,10 +10,20 @@ const analyticsRoutes = require("./routes/analyticsRoutes")
 const complaintRoutes = require("./routes/complaintRoutes")
 const notificationRoutes = require("./routes/notificationRoutes")
 const { notFound, errorHandler } = require("./middleware/errorMiddleware")
+const { runEscalationCheck } = require("./services/escalationService")
 
 const app = express()
 
 connectDB()
+
+// ---------------------------------------------------------------------------
+// Cron Jobs
+// ---------------------------------------------------------------------------
+// Run SLA escalation check every 15 minutes
+cron.schedule("*/15 * * * *", async () => {
+  console.log("[Cron] Running escalation check…")
+  await runEscalationCheck()
+})
 
 app.use(cors())
 app.use(express.json())

@@ -60,19 +60,37 @@ exports.createComplaint = async (req, res) => {
         .json({ message: "Title and description are required" });
     }
 
-    // AI-based department assignment
-    const departmentId = await aiCategorization(description);
-    const department = await Department.findById(departmentId);
+    // ── AI-based classification ──────────────────────────────────────────
+    // The service returns { category, urgency, departmentId }.
+    // Student-provided values take priority, but AI urgency can *escalate*
+    // (never downgrade) the student's choice.
+    const aiResult = await aiCategorization(title, description);
+
+    const effectiveCategory = category || aiResult.category;
+
+    // Urgency precedence: use whichever is more severe between student
+    // input and AI detection, so safety keywords always escalate.
+    const URGENCY_RANK = { low: 0, medium: 1, high: 2, critical: 3 };
+    const studentUrgency = urgency || "medium";
+    const aiUrgency = aiResult.urgency || "medium";
+    const effectiveUrgency =
+      (URGENCY_RANK[aiUrgency] || 0) > (URGENCY_RANK[studentUrgency] || 0)
+        ? aiUrgency
+        : studentUrgency;
+
+    const departmentId = aiResult.departmentId;
+    const department = departmentId
+      ? await Department.findById(departmentId)
+      : null;
 
     // Compute SLA deadline
-    const effectiveUrgency = urgency || "medium";
     const slaDeadline = computeSlaDeadline(department, effectiveUrgency);
 
     // Build complaint document
     const complaintData = {
       title,
       description,
-      category: category || undefined,
+      category: effectiveCategory,
       urgency: effectiveUrgency,
       department: departmentId,
       slaDeadline,
