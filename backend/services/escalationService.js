@@ -2,6 +2,7 @@ const Complaint = require("../models/Complaint");
 const Department = require("../models/Department");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
+const { emitNotification } = require("../sockets/socketInstance");
 
 // ---------------------------------------------------------------------------
 // Escalation Service
@@ -94,12 +95,15 @@ async function notifyDepartmentHead(complaint) {
     return notifyAdmins(complaint);
   }
 
-  await Notification.create({
+  const notification = await Notification.create({
     recipient: department.head,
     message: `Complaint "${complaint.title}" (ID: ${complaint._id}) has breached its SLA deadline and been escalated to you for action.`,
     type: "escalation",
     relatedComplaint: complaint._id
   });
+
+  // Emit in real time via Socket.io
+  emitNotification(String(department.head), notification.toJSON());
 
   console.log(
     `[Escalation] Notified department head (${department.head}) for complaint ${complaint._id}`
@@ -118,14 +122,19 @@ async function notifyAdmins(complaint) {
     return;
   }
 
-  const notifications = admins.map((admin) => ({
+  const notificationDocs = admins.map((admin) => ({
     recipient: admin._id,
     message: `Complaint "${complaint.title}" (ID: ${complaint._id}) has been escalated to admin level (escalation level ${complaint.escalationLevel}). Immediate attention required.`,
     type: "escalation",
     relatedComplaint: complaint._id
   }));
 
-  await Notification.insertMany(notifications);
+  const savedNotifications = await Notification.insertMany(notificationDocs);
+
+  // Emit in real time via Socket.io to each admin
+  for (const notif of savedNotifications) {
+    emitNotification(String(notif.recipient), notif.toJSON());
+  }
 
   console.log(
     `[Escalation] Notified ${admins.length} admin(s) for complaint ${complaint._id}`

@@ -1,7 +1,9 @@
 const Complaint = require("../models/Complaint");
 const Department = require("../models/Department");
 const Feedback = require("../models/Feedback");
+const Notification = require("../models/Notification");
 const aiCategorization = require("../services/aiCategorizationService");
+const { emitNotification } = require("../sockets/socketInstance");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -110,6 +112,17 @@ exports.createComplaint = async (req, res) => {
 
     // Sanitize response for anonymous complaints
     const result = sanitizeAnonymous(complaint.toJSON(), req.user.role);
+
+    // ── Real-time notification to department head ─────────────────────────
+    if (department && department.head) {
+      const notif = await Notification.create({
+        recipient: department.head,
+        message: `New complaint "${title}" has been submitted to your department.`,
+        type: "new_complaint",
+        relatedComplaint: complaint._id
+      });
+      emitNotification(String(department.head), notif.toJSON());
+    }
 
     res.status(201).json(result);
   } catch (error) {
@@ -267,6 +280,17 @@ exports.updateStatus = async (req, res) => {
     }
 
     await complaint.save();
+
+    // ── Real-time notification to complaint submitter ─────────────────────
+    if (complaint.submittedBy) {
+      const notif = await Notification.create({
+        recipient: complaint.submittedBy,
+        message: `Your complaint "${complaint.title}" status changed from "${previousStatus}" to "${newStatus}".`,
+        type: "status_update",
+        relatedComplaint: complaint._id
+      });
+      emitNotification(String(complaint.submittedBy), notif.toJSON());
+    }
 
     res.json(complaint);
   } catch (error) {
