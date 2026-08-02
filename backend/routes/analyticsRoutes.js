@@ -1,8 +1,18 @@
 const express = require("express");
 const router = express.Router();
 
-const { analyticsSummary } = require("../controllers/analyticsController");
+const {
+  analyticsSummary,
+  analyticsLeaderboard,
+  analyticsTrends
+} = require("../controllers/analyticsController");
 
-router.get("/summary", analyticsSummary);
+const { protect } = require("../middleware/authMiddleware");
+const { authorize } = require("../middleware/roleMiddleware");
 
-module.exports = router
+// All analytics routes restricted to admin and departmentHead
+router.get("/summary", protect, authorize("admin", "departmentHead"), analyticsSummary);
+router.get("/leaderboard", protect, authorize("admin", "departmentHead"), analyticsLeaderboard);
+router.get("/trends", protect, authorize("admin", "departmentHead"), analyticsTrends);
+
+module.exports = router;
