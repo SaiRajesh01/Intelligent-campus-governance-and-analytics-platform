@@ -1,9 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 const NAV_ITEMS = {
   student: [
     { label: "Dashboard", path: "/student-dashboard", icon: "🏠" },
+    { label: "My Complaints", path: "/student-dashboard", icon: "📋" },
   ],
   departmentHead: [
     { label: "Dashboard", path: "/department-dashboard", icon: "🏠" },
@@ -48,11 +50,11 @@ export default function DashboardShell({ children }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+          {navItems.map((item, i) => {
+            const isActive = location.pathname === item.path && i === 0;
             return (
               <Link
-                key={item.path}
+                key={item.label}
                 to={item.path}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   isActive
@@ -95,9 +97,15 @@ export default function DashboardShell({ children }) {
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────── */}
-      <main className="ml-64 flex-1 p-8">
-        {children}
-      </main>
+      <div className="ml-64 flex-1">
+        {/* Top bar with notification bell */}
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-end border-b border-white/5 bg-surface-950/60 px-6 backdrop-blur-lg">
+          <NotificationBell />
+        </header>
+        <main className="p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

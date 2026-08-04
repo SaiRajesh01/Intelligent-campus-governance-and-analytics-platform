@@ -1,11 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import NotificationToast from "./components/NotificationToast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentDashboard from "./pages/StudentDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import ComplaintDetail from "./pages/ComplaintDetail";
 
 // ── Root redirect: send authenticated users to their dashboard ────────────
 function RootRedirect() {
@@ -28,44 +31,59 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* ── Public routes ────────────────────────────────────────── */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <NotificationProvider>
+          {/* Global toast overlay */}
+          <NotificationToast />
 
-          {/* ── Protected: Student ──────────────────────────────────── */}
-          <Route
-            path="/student-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <StudentDashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Routes>
+            {/* ── Public routes ────────────────────────────────────────── */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* ── Protected: Department Head ──────────────────────────── */}
-          <Route
-            path="/department-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["departmentHead"]}>
-                <DepartmentDashboard />
-              </ProtectedRoute>
-            }
-          />
+            {/* ── Protected: Student ──────────────────────────────────── */}
+            <Route
+              path="/student-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["student"]}>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* ── Protected: Admin ────────────────────────────────────── */}
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+            {/* ── Protected: Complaint Detail (any authenticated user) ── */}
+            <Route
+              path="/complaints/:id"
+              element={
+                <ProtectedRoute>
+                  <ComplaintDetail />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* ── Catch-all: redirect to role-based dashboard or login ── */}
-          <Route path="*" element={<RootRedirect />} />
-        </Routes>
+            {/* ── Protected: Department Head ──────────────────────────── */}
+            <Route
+              path="/department-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["departmentHead"]}>
+                  <DepartmentDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ── Protected: Admin ────────────────────────────────────── */}
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ── Catch-all: redirect to role-based dashboard or login ── */}
+            <Route path="*" element={<RootRedirect />} />
+          </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   );
