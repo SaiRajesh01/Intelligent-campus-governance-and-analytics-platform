@@ -5,13 +5,14 @@ import NotificationBell from "./NotificationBell";
 const NAV_ITEMS = {
   student: [
     { label: "Dashboard", path: "/student-dashboard", icon: "🏠" },
-    { label: "My Complaints", path: "/student-dashboard", icon: "📋" },
   ],
   departmentHead: [
     { label: "Dashboard", path: "/department-dashboard", icon: "🏠" },
+    { label: "Analytics", path: "/analytics", icon: "📊" },
   ],
   admin: [
     { label: "Dashboard", path: "/admin-dashboard", icon: "🏠" },
+    { label: "Analytics", path: "/analytics", icon: "📊" },
   ],
 };
 
@@ -50,11 +51,11 @@ export default function DashboardShell({ children }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {navItems.map((item, i) => {
-            const isActive = location.pathname === item.path && i === 0;
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
             return (
               <Link
-                key={item.label}
+                key={item.path + item.label}
                 to={item.path}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   isActive

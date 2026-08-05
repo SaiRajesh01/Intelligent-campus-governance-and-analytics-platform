@@ -9,6 +9,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ComplaintDetail from "./pages/ComplaintDetail";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 // ── Root redirect: send authenticated users to their dashboard ────────────
 function RootRedirect() {
@@ -76,6 +77,16 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ── Protected: Analytics (admin + departmentHead) ──────── */}
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "departmentHead"]}>
+                  <AnalyticsPage />
                 </ProtectedRoute>
               }
             />
