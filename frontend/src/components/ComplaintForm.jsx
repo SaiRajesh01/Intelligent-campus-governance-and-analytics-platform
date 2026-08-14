@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 
 const CATEGORIES = [
@@ -17,13 +17,27 @@ export default function ComplaintForm({ onCreated }) {
     title: "",
     description: "",
     category: "",
+    department: "",
     isAnonymous: false,
     attachments: [],
   });
+  const [departments, setDepartments] = useState([]);
   const [fileNames, setFileNames] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Fetch departments on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/departments");
+        setDepartments(data);
+      } catch {
+        // silently fail
+      }
+    })();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -50,11 +64,16 @@ export default function ComplaintForm({ onCreated }) {
       return setError("Title and description are required.");
     }
 
+    if (!form.department) {
+      return setError("Please select a department.");
+    }
+
     setLoading(true);
     try {
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
+        department: form.department,
         isAnonymous: form.isAnonymous,
       };
       if (form.category) payload.category = form.category;
@@ -63,7 +82,7 @@ export default function ComplaintForm({ onCreated }) {
       await api.post("/complaints", payload);
 
       setSuccess("Complaint submitted successfully!");
-      setForm({ title: "", description: "", category: "", isAnonymous: false, attachments: [] });
+      setForm({ title: "", description: "", category: "", department: "", isAnonymous: false, attachments: [] });
       setFileNames([]);
       if (onCreated) onCreated();
     } catch (err) {
@@ -123,6 +142,31 @@ export default function ComplaintForm({ onCreated }) {
           placeholder="Describe the issue in detail…"
           className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-surface-200/40 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25"
         />
+      </div>
+
+      {/* Department */}
+      <div className="mb-4">
+        <label htmlFor="complaint-department" className="mb-1.5 block text-sm font-medium text-surface-200">
+          Department
+          <span className="ml-1 text-xs text-red-400">*</span>
+        </label>
+        <select
+          id="complaint-department"
+          name="department"
+          value={form.department}
+          onChange={handleChange}
+          required
+          className="w-full cursor-pointer rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25"
+        >
+          <option value="" className="bg-surface-900 text-white">
+            Select department…
+          </option>
+          {departments.map((d) => (
+            <option key={d._id} value={d._id} className="bg-surface-900 text-white">
+              {d.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Category */}

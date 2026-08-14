@@ -54,7 +54,7 @@ function sanitizeAnonymous(complaintObj, requestingUserRole) {
 // ---------------------------------------------------------------------------
 exports.createComplaint = async (req, res) => {
   try {
-    const { title, description, category, urgency, isAnonymous } = req.body;
+    const { title, description, category, urgency, isAnonymous, department: studentDepartment } = req.body;
 
     if (!title || !description) {
       return res
@@ -80,7 +80,9 @@ exports.createComplaint = async (req, res) => {
         ? aiUrgency
         : studentUrgency;
 
-    const departmentId = aiResult.departmentId;
+    // Student-selected department takes priority over AI-detected one.
+    // This ensures the complaint routes to the department the student chose.
+    const departmentId = studentDepartment || aiResult.departmentId;
     const department = departmentId
       ? await Department.findById(departmentId)
       : null;
