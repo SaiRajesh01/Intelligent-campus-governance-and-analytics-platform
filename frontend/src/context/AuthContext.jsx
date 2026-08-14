@@ -39,13 +39,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   // ── Register ────────────────────────────────────────────────────────────
-  const register = useCallback(async (name, email, password, role) => {
-    const { data } = await api.post("/auth/register", {
-      name,
-      email,
-      password,
-      role,
-    });
+  const register = useCallback(async (name, email, password, role, department) => {
+    const payload = { name, email, password, role };
+    if (department) payload.department = department;
+    const { data } = await api.post("/auth/register", payload);
     const { user: userData, token } = data;
     persistAuth(userData, token);
     return userData;

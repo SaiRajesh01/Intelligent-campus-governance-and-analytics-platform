@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 const ROLES = [
   {
@@ -35,9 +36,23 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     role: "student",
+    department: "",
   });
+  const [departments, setDepartments] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Fetch departments for the departmentHead role selector
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/departments");
+        setDepartments(data);
+      } catch {
+        // silently fail — dropdown will just be empty
+      }
+    })();
+  }, []);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -52,10 +67,19 @@ export default function Register() {
     if (form.password.length < 6) {
       return setError("Password must be at least 6 characters");
     }
+    if (form.role === "departmentHead" && !form.department) {
+      return setError("Please select a department");
+    }
 
     setLoading(true);
     try {
-      const user = await register(form.name, form.email, form.password, form.role);
+      const user = await register(
+        form.name,
+        form.email,
+        form.password,
+        form.role,
+        form.role === "departmentHead" ? form.department : undefined
+      );
       const dashboardMap = {
         student: "/student-dashboard",
         departmentHead: "/department-dashboard",
@@ -171,7 +195,7 @@ export default function Register() {
           </div>
 
           {/* Role selector */}
-          <div className="mb-6">
+          <div className="mb-5">
             <label className="mb-2 block text-sm font-medium text-surface-200">
               I am a…
             </label>
@@ -180,7 +204,7 @@ export default function Register() {
                 <button
                   key={r.value}
                   type="button"
-                  onClick={() => setForm((prev) => ({ ...prev, role: r.value }))}
+                  onClick={() => setForm((prev) => ({ ...prev, role: r.value, department: "" }))}
                   className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border px-3 py-3.5 text-center transition ${
                     form.role === r.value
                       ? "border-brand-500 bg-brand-500/15 text-brand-300 shadow-md shadow-brand-500/10"
@@ -196,6 +220,38 @@ export default function Register() {
               ))}
             </div>
           </div>
+
+          {/* Department selector — shown only for departmentHead */}
+          {form.role === "departmentHead" && (
+            <div className="mb-6">
+              <label htmlFor="register-department" className="mb-1.5 block text-sm font-medium text-surface-200">
+                Select Department
+              </label>
+              {departments.length === 0 ? (
+                <p className="rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-2.5 text-sm text-orange-300">
+                  No departments found. Please ask an admin to create departments first.
+                </p>
+              ) : (
+                <select
+                  id="register-department"
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
+                  required
+                  className="w-full cursor-pointer rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25"
+                >
+                  <option value="" className="bg-surface-900 text-white">
+                    Choose a department…
+                  </option>
+                  {departments.map((d) => (
+                    <option key={d._id} value={d._id} className="bg-surface-900 text-white">
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
 
           {/* Submit */}
           <button
