@@ -17,18 +17,19 @@ const URGENCIES = ["low", "medium", "high", "critical"];
 const STATUSES = ["open", "in-progress", "escalated", "resolved", "closed"];
 
 const MOCK_TITLES = [
+  { title: "Power supply disruption in EEE Power Electronics Lab", category: "Academic", dept: "EEE", urgency: "high" },
+  { title: "CNC Machine calibration issue in Mechanical Workshop", category: "Academic", dept: "Mechanical", urgency: "medium" },
+  { title: "Structural testing equipment error in Civil Hydraulics Lab", category: "Academic", dept: "Civil", urgency: "high" },
+  { title: "Compiler server down in CSE Cloud Computing Lab", category: "IT/Network", dept: "CSE", urgency: "critical" },
+  { title: "Oscilloscopes unavailable in ECE VLSI Lab", category: "Academic", dept: "ECE", urgency: "medium" },
+  { title: "Smart TV screen mirroring issue in MBA Case Study Room", category: "Academic", dept: "MBA", urgency: "low" },
+  { title: "Database server connection failure in MCA Lab", category: "IT/Network", dept: "MCA", urgency: "high" },
+  { title: "Research software license renewal needed for M.Tech lab", category: "Academic", dept: "M.Tech", urgency: "medium" },
   { title: "Wi-Fi disconnected in Central Library", category: "IT/Network", dept: "IT/Network", urgency: "high" },
   { title: "Water leakage in Hostel Block B Restroom", category: "Hostel", dept: "Hostel", urgency: "critical" },
-  { title: "Projector malfunctioning in Hall 302", category: "Academic", dept: "Academic", urgency: "medium" },
   { title: "Broken chairs in Seminar Room 1", category: "Infrastructure", dept: "Infrastructure", urgency: "low" },
   { title: "Delay in ID card issuance", category: "Administrative", dept: "Administrative", urgency: "medium" },
-  { title: "Air conditioner failure in Computer Lab 2", category: "IT/Network", dept: "IT/Network", urgency: "high" },
-  { title: "Mess food quality concern - Block A", category: "Hostel", dept: "Hostel", urgency: "high" },
-  { title: "Course registration portal error", category: "Academic", dept: "Academic", urgency: "critical" },
-  { title: "Streetlight outage near Student Center", category: "Infrastructure", dept: "Infrastructure", urgency: "medium" },
-  { title: "Noise disturbance during quiet hours", category: "Student Affairs", dept: "Student Affairs", urgency: "low" },
-  { title: "Bus schedule synchronization issue", category: "Administrative", dept: "Administrative", urgency: "medium" },
-  { title: "Library E-Resource access problem", category: "Academic", dept: "Academic", urgency: "low" }
+  { title: "Noise disturbance during quiet hours", category: "Student Affairs", dept: "Student Affairs", urgency: "low" }
 ];
 
 async function seed() {
@@ -59,11 +60,11 @@ async function seed() {
     });
   }
 
-  // Generate 25 sample complaints spread across past 3 months
+  // Generate 35 sample complaints spread across past 3 months
   const now = new Date();
   const complaintsToCreate = [];
 
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 35; i++) {
     const item = MOCK_TITLES[i % MOCK_TITLES.length];
     const deptId = deptMap[item.dept] || departments[i % departments.length]._id;
     
@@ -84,7 +85,7 @@ async function seed() {
 
     complaintsToCreate.push({
       title: `${item.title} #${i + 1}`,
-      description: `Detailed description of issue: ${item.title}. Requires attention from the relevant department staff.`,
+      description: `Detailed description of issue: ${item.title}. Requires attention from the ${item.dept} department staff.`,
       category: item.category,
       urgency: item.urgency,
       department: deptId,
@@ -99,7 +100,6 @@ async function seed() {
     });
   }
 
-  // Clear existing complaints if needed or just insert
   const created = await Complaint.insertMany(complaintsToCreate);
   console.log(`✓ Successfully created ${created.length} sample complaints!`);
 
@@ -111,7 +111,7 @@ async function seed() {
   }
 
   console.log("✓ Updated department metrics.");
-  console.log("\nDone! Refresh the Analytics page in your browser.");
+  console.log("\nDone! Refresh the application in your browser.");
   process.exit(0);
 }
 

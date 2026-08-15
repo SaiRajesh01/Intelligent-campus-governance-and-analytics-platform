@@ -13,6 +13,17 @@ const Department = require("../models/Department");
 const connectDB = require("../config/db");
 
 const DEPARTMENTS = [
+  // Academic / Engineering & Management Departments
+  { name: "CSE" },
+  { name: "ECE" },
+  { name: "EEE" },
+  { name: "Mechanical" },
+  { name: "Civil" },
+  { name: "MBA" },
+  { name: "MCA" },
+  { name: "M.Tech" },
+
+  // General Campus Administration & Facilities
   { name: "Infrastructure" },
   { name: "Academic" },
   { name: "Hostel" },
@@ -24,6 +35,7 @@ const DEPARTMENTS = [
 async function seed() {
   await connectDB();
 
+  console.log("Seeding departments...");
   for (const dept of DEPARTMENTS) {
     const exists = await Department.findOne({ name: dept.name });
     if (exists) {
