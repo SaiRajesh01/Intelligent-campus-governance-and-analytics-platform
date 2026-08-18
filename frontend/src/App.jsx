@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import NotificationToast from "./components/NotificationToast";
@@ -11,12 +11,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
-// ── Root redirect: send authenticated users to their dashboard ────────────
+// Root redirect for unmatched routes
 function RootRedirect() {
-  const { user, isAuthenticated, loading } = useAuth();
-
-  if (loading) return null;
-
+  const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   const dashboardMap = {
@@ -25,7 +22,7 @@ function RootRedirect() {
     admin: "/admin-dashboard",
   };
 
-  return <Navigate to={dashboardMap[user.role] || "/login"} replace />;
+  return <Navigate to={dashboardMap[user?.role] || "/login"} replace />;
 }
 
 export default function App() {
@@ -37,11 +34,14 @@ export default function App() {
           <NotificationToast />
 
           <Routes>
-            {/* ── Public routes ────────────────────────────────────────── */}
+            {/* Default entry point: Always lands on Login page */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* ── Protected: Student ──────────────────────────────────── */}
+            {/* Protected: Student */}
             <Route
               path="/student-dashboard"
               element={
@@ -51,7 +51,7 @@ export default function App() {
               }
             />
 
-            {/* ── Protected: Complaint Detail (any authenticated user) ── */}
+            {/* Protected: Complaint Detail (any authenticated user) */}
             <Route
               path="/complaints/:id"
               element={
@@ -61,7 +61,7 @@ export default function App() {
               }
             />
 
-            {/* ── Protected: Department Head ──────────────────────────── */}
+            {/* Protected: Department Head */}
             <Route
               path="/department-dashboard"
               element={
@@ -71,7 +71,7 @@ export default function App() {
               }
             />
 
-            {/* ── Protected: Admin ────────────────────────────────────── */}
+            {/* Protected: Admin */}
             <Route
               path="/admin-dashboard"
               element={
@@ -81,7 +81,7 @@ export default function App() {
               }
             />
 
-            {/* ── Protected: Analytics (admin + departmentHead) ──────── */}
+            {/* Protected: Analytics (admin + departmentHead) */}
             <Route
               path="/analytics"
               element={
@@ -91,7 +91,7 @@ export default function App() {
               }
             />
 
-            {/* ── Catch-all: redirect to role-based dashboard or login ── */}
+            {/* Catch-all: redirect to login or role dashboard */}
             <Route path="*" element={<RootRedirect />} />
           </Routes>
         </NotificationProvider>
