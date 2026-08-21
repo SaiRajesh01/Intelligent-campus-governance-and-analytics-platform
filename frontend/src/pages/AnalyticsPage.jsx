@@ -1,20 +1,19 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   PieChart, Pie, Cell, Tooltip as ReTooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   LineChart, Line,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer,
 } from "recharts";
 import DashboardShell from "../components/DashboardShell";
 import api from "../services/api";
 
-// ── Color palette for charts ────────────────────────────────────────────
 const COLORS = [
-  "#818cf8", "#f472b6", "#fb923c", "#34d399",
-  "#60a5fa", "#facc15", "#a78bfa", "#f87171",
+  "#6366f1", "#ec4899", "#f59e0b", "#10b981",
+  "#3b82f6", "#8b5cf6", "#14b8a6", "#ef4444",
 ];
 
-const CHART_CARD = "rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl";
+const CHART_CARD = "relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/80 p-7 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20";
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState(null);
@@ -48,14 +47,14 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <DashboardShell>
-        <div className="flex justify-center py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
+          <p className="mt-4 text-xs font-semibold text-surface-200/50">Aggregating campus intelligence...</p>
         </div>
       </DashboardShell>
     );
   }
 
-  // ── Data transforms ────────────────────────────────────────────────────
   const categoryData = summary?.byCategory || [];
   const deptData = summary?.byDepartment?.map((d) => ({
     name: d.departmentName,
@@ -79,25 +78,45 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardShell>
-      <div className="animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-white">Analytics & Insights 📊</h1>
-        <p className="mt-1 text-surface-200/70">
-          System-wide analytics, department leaderboard, and complaint trends.
-        </p>
+      <div className="animate-fade-in-up space-y-8">
+        {/* ── Banner ─────────────────────────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-r from-indigo-950/70 via-brand-950/50 to-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-300">
+                📊 Campus Intelligence & Analytics
+              </span>
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+                Analytics & Insights
+              </h1>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-indigo-200/80 sm:text-base">
+                Real-time grievance metrics, departmental performance leaderboards, and AI-predicted issue volumes.
+              </p>
+            </div>
+            <button
+              onClick={fetchAll}
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"
+            >
+              <span>🔄</span>
+              <span>Re-calculate Metrics</span>
+            </button>
+          </div>
+        </div>
 
-        {/* ── Summary cards ───────────────────────────────────────────── */}
+        {/* ── Summary Stats ──────────────────────────────────────────── */}
         {summary && (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {[
-              { title: "Total", value: summary.total, color: "from-brand-500 to-brand-700" },
-              { title: "Open", value: summary.open, color: "from-slate-400 to-slate-600" },
-              { title: "In Progress", value: summary["in-progress"] || 0, color: "from-blue-500 to-cyan-600" },
-              { title: "Escalated", value: summary.escalated, color: "from-orange-500 to-red-600" },
-              { title: "Resolved", value: summary.resolved, color: "from-emerald-500 to-green-600" },
+              { title: "Total Volume", value: summary.total, gradient: "from-indigo-500 to-brand-500", glow: "border-indigo-500/20 bg-indigo-500/10" },
+              { title: "Open Unassigned", value: summary.open, gradient: "from-slate-400 to-slate-600", glow: "border-slate-500/20 bg-slate-500/10" },
+              { title: "In Progress", value: summary["in-progress"] || 0, gradient: "from-blue-400 to-cyan-500", glow: "border-blue-500/20 bg-blue-500/10" },
+              { title: "Escalated", value: summary.escalated, gradient: "from-orange-500 to-red-500", glow: "border-orange-500/20 bg-orange-500/10" },
+              { title: "Resolved", value: summary.resolved, gradient: "from-emerald-400 to-teal-500", glow: "border-emerald-500/20 bg-emerald-500/10" },
             ].map((card) => (
-              <div key={card.title} className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                <p className="text-xs font-medium text-surface-200/50">{card.title}</p>
-                <p className={`mt-1 bg-gradient-to-r ${card.color} bg-clip-text text-2xl font-extrabold text-transparent`}>
+              <div key={card.title} className={`rounded-2xl border p-5 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${card.glow}`}>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-surface-200/70">{card.title}</p>
+                <p className={`mt-2 bg-gradient-to-r ${card.gradient} bg-clip-text text-3xl font-black text-transparent`}>
                   {card.value}
                 </p>
               </div>
@@ -105,11 +124,11 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        {/* ── Charts row 1: By Category (Pie) + By Department (Bar) ── */}
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        {/* ── Charts Row 1: Category & Department ────────────────────── */}
+        <div className="grid gap-8 lg:grid-cols-2">
           {/* Pie: Complaints by Category */}
           <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-surface-200/50">
+            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
               Complaints by Category
             </h2>
             {categoryData.length === 0 ? (
@@ -123,12 +142,10 @@ export default function AnalyticsPage() {
                     nameKey="category"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
+                    outerRadius={95}
                     innerRadius={50}
-                    paddingAngle={3}
-                    label={({ category, percent }) =>
-                      `${category} (${(percent * 100).toFixed(0)}%)`
-                    }
+                    paddingAngle={4}
+                    label={({ category, percent }) => `${category} (${(percent * 100).toFixed(0)}%)`}
                     labelLine={false}
                   >
                     {categoryData.map((_, i) => (
@@ -143,106 +160,112 @@ export default function AnalyticsPage() {
 
           {/* Bar: Complaints by Department */}
           <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-surface-200/50">
+            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
               Complaints by Department
             </h2>
             {deptData.length === 0 ? (
               <EmptyChart />
             ) : (
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={deptData} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <BarChart data={deptData} layout="vertical" margin={{ left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                   <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <YAxis dataKey="name" type="category" width={100} tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#94a3b8", fontSize: 11 }} />
                   <ReTooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="#818cf8" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="count" fill="#6366f1" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* ── Charts row 2: Trend line + Prediction ──────────────────── */}
-        <div className="mt-6">
-          <div className={CHART_CARD}>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-surface-200/50">
-                Complaint Volume Trend
+        {/* ── Charts Row 2: Volume Trend & AI Prediction ─────────────── */}
+        <div className={CHART_CARD}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                Complaint Volume Trend & Forecasting
               </h2>
-              <div className="flex gap-1 rounded-xl bg-surface-900/60 p-1">
-                {["month", "week"].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setTrendPeriod(p)}
-                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition ${
-                      trendPeriod === p
-                        ? "bg-brand-500/20 text-brand-300"
-                        : "text-surface-200/50 hover:text-white"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs text-surface-200/50 mt-0.5">Historical submission timeline across campus</p>
             </div>
-
-            {timelineData.length === 0 ? (
-              <EmptyChart />
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <ReTooltip contentStyle={tooltipStyle} />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#818cf8"
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: "#818cf8" }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-
-            {/* Prediction callout */}
-            {trends?.prediction?.predictedNextPeriodTotal != null && (
-              <div className="mt-4 rounded-xl border border-brand-500/20 bg-brand-500/5 px-4 py-3">
-                <p className="text-xs font-semibold text-brand-300">
-                  📈 Predicted next {trendPeriod} volume:{" "}
-                  <span className="text-lg font-extrabold text-white">
-                    {trends.prediction.predictedNextPeriodTotal}
-                  </span>
-                </p>
-                <p className="mt-0.5 text-[11px] text-surface-200/40">
-                  {trends.prediction.note}
-                </p>
-              </div>
-            )}
+            <div className="flex gap-1 rounded-2xl bg-black/40 p-1 border border-white/10">
+              {["month", "week"].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setTrendPeriod(p)}
+                  className={`cursor-pointer rounded-xl px-3.5 py-1.5 text-xs font-bold capitalize transition ${
+                    trendPeriod === p
+                      ? "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/25"
+                      : "text-surface-200/60 hover:text-white"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {timelineData.length === 0 ? (
+            <EmptyChart />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={timelineData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                <ReTooltip contentStyle={tooltipStyle} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#818cf8"
+                  strokeWidth={3}
+                  dot={{ r: 5, fill: "#6366f1" }}
+                  activeDot={{ r: 7 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+
+          {/* Prediction Box */}
+          {trends?.prediction?.predictedNextPeriodTotal != null && (
+            <div className="mt-5 rounded-2xl border border-brand-500/30 bg-gradient-to-r from-brand-500/10 via-indigo-500/5 to-transparent p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-brand-300">
+                  📈 Moving Average Forecast
+                </p>
+                <span className="rounded-full bg-brand-500/20 border border-brand-500/30 px-2.5 py-0.5 text-[10px] font-bold text-brand-300">
+                  AI Estimate
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-black text-white">
+                ~{trends.prediction.predictedNextPeriodTotal} <span className="text-xs font-medium text-surface-200/60">predicted complaints next {trendPeriod}</span>
+              </p>
+              <p className="mt-1 text-[11px] text-surface-200/40">
+                {trends.prediction.note}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ── Department Leaderboard ──────────────────────────────────── */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          {/* Gamification score bar chart */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Gamification Bar Chart */}
           <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-surface-200/50">
-              Department Leaderboard 🏆
+            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+              Department Performance Leaderboard 🏆
             </h2>
             {leaderboardData.length === 0 ? (
               <EmptyChart />
             ) : (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={leaderboardData} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <BarChart data={leaderboardData} layout="vertical" margin={{ left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                   <XAxis type="number" domain={[0, 100]} tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <YAxis dataKey="name" type="category" width={110} tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#94a3b8", fontSize: 11 }} />
                   <ReTooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="score" name="Score" fill="#818cf8" radius={[0, 6, 6, 0]}>
+                  <Bar dataKey="score" name="Score" fill="#6366f1" radius={[0, 8, 8, 0]}>
                     {leaderboardData.map((entry, i) => (
-                      <Cell key={i} fill={i === 0 ? "#facc15" : i === 1 ? "#94a3b8" : i === 2 ? "#cd7f32" : "#818cf8"} />
+                      <Cell key={i} fill={i === 0 ? "#facc15" : i === 1 ? "#94a3b8" : i === 2 ? "#cd7f32" : "#6366f1"} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -250,10 +273,10 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          {/* SLA compliance + resolution rate table */}
+          {/* SLA Table */}
           <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-surface-200/50">
-              SLA Compliance & Resolution Rate
+            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+              SLA Compliance & Resolution Breakdown
             </h2>
             {leaderboardData.length === 0 ? (
               <EmptyChart />
@@ -261,32 +284,28 @@ export default function AnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-xs uppercase tracking-wider text-surface-200/40">
-                      <th className="px-3 py-2">#</th>
-                      <th className="px-3 py-2">Department</th>
-                      <th className="px-3 py-2">Resolution %</th>
-                      <th className="px-3 py-2">SLA %</th>
-                      <th className="px-3 py-2">Avg Hours</th>
-                      <th className="px-3 py-2">Score</th>
+                    <tr className="border-b border-white/10 text-xs font-bold uppercase tracking-wider text-surface-200/50">
+                      <th className="px-3 py-2.5">Rank</th>
+                      <th className="px-3 py-2.5">Dept</th>
+                      <th className="px-3 py-2.5">Resolution</th>
+                      <th className="px-3 py-2.5">SLA Speed</th>
+                      <th className="px-3 py-2.5 font-black text-white">Score</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-white/5">
                     {leaderboardData.map((d, i) => (
-                      <tr key={d.name} className="border-b border-white/5 transition hover:bg-white/[0.03]">
-                        <td className="px-3 py-2.5">
+                      <tr key={d.name} className="transition hover:bg-white/[0.02]">
+                        <td className="px-3 py-3">
                           <RankBadge rank={i + 1} />
                         </td>
-                        <td className="px-3 py-2.5 font-medium text-white">{d.name}</td>
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-3 font-bold text-white">{d.name}</td>
+                        <td className="px-3 py-3">
                           <PercentBar value={d.resolution} color="bg-emerald-500" />
                         </td>
-                        <td className="px-3 py-2.5">
-                          <PercentBar value={d.sla} color="bg-brand-500" />
+                        <td className="px-3 py-3">
+                          <PercentBar value={d.sla} color="bg-indigo-500" />
                         </td>
-                        <td className="px-3 py-2.5 text-surface-200/60">
-                          {d.avgHours != null ? `${d.avgHours}h` : "—"}
-                        </td>
-                        <td className="px-3 py-2.5 font-bold text-white">{d.score}</td>
+                        <td className="px-3 py-3 font-black text-brand-300">{d.score}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -300,11 +319,9 @@ export default function AnalyticsPage() {
   );
 }
 
-// ── Helper components ───────────────────────────────────────────────────
-
 function EmptyChart() {
   return (
-    <div className="flex h-40 items-center justify-center text-sm text-surface-200/30">
+    <div className="flex h-44 items-center justify-center text-xs font-semibold text-surface-200/40">
       No data available yet
     </div>
   );
@@ -312,30 +329,31 @@ function EmptyChart() {
 
 function RankBadge({ rank }) {
   const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
-  if (medals[rank]) return <span className="text-lg">{medals[rank]}</span>;
-  return <span className="text-xs text-surface-200/40">#{rank}</span>;
+  if (medals[rank]) return <span className="text-xl">{medals[rank]}</span>;
+  return <span className="text-xs font-bold text-surface-200/50">#{rank}</span>;
 }
 
 function PercentBar({ value, color }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-16 rounded-full bg-white/10">
+      <div className="h-2 w-16 rounded-full bg-white/10 overflow-hidden">
         <div
           className={`h-full rounded-full ${color}`}
           style={{ width: `${Math.min(value, 100)}%` }}
         />
       </div>
-      <span className="text-xs text-surface-200/60">{value}%</span>
+      <span className="text-xs font-bold text-surface-200/70">{value}%</span>
     </div>
   );
 }
 
 const tooltipStyle = {
-  backgroundColor: "#1e293b",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: "12px",
-  color: "#e2e8f0",
+  backgroundColor: "#0b132b",
+  border: "1px solid rgba(255,255,255,0.15)",
+  borderRadius: "14px",
+  color: "#f1f5f9",
   fontSize: "12px",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
 };
 
 function monthName(num) {

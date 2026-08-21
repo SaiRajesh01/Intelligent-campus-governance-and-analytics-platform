@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import DashboardShell from "../components/DashboardShell";
 
 const STATUS_CONFIG = {
-  open:          { label: "Open",        bg: "bg-slate-500/15",   text: "text-slate-300",   dot: "bg-slate-400" },
-  "in-progress": { label: "In Progress", bg: "bg-blue-500/15",    text: "text-blue-300",    dot: "bg-blue-400" },
-  escalated:     { label: "Escalated",   bg: "bg-orange-500/15",  text: "text-orange-300",  dot: "bg-orange-400" },
-  resolved:      { label: "Resolved",    bg: "bg-emerald-500/15", text: "text-emerald-300", dot: "bg-emerald-400" },
-  closed:        { label: "Closed",      bg: "bg-purple-500/15",  text: "text-purple-300",  dot: "bg-purple-400" },
+  open:          { label: "Open",        bg: "bg-slate-500/15 border-slate-500/30",   text: "text-slate-300",   dot: "bg-slate-400" },
+  "in-progress": { label: "In Progress", bg: "bg-blue-500/15 border-blue-500/30",    text: "text-blue-300",    dot: "bg-blue-400" },
+  escalated:     { label: "Escalated",   bg: "bg-orange-500/15 border-orange-500/30",  text: "text-orange-300",  dot: "bg-orange-400" },
+  resolved:      { label: "Resolved",    bg: "bg-emerald-500/15 border-emerald-500/30", text: "text-emerald-300", dot: "bg-emerald-400" },
+  closed:        { label: "Closed",      bg: "bg-purple-500/15 border-purple-500/30",  text: "text-purple-300",  dot: "bg-purple-400" },
 };
 
 export default function ComplaintDetail() {
@@ -18,7 +18,6 @@ export default function ComplaintDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Feedback state
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackHover, setFeedbackHover] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState("");
@@ -36,7 +35,7 @@ export default function ComplaintDetail() {
       const { data } = await api.get(`/complaints/${id}`);
       setComplaint(data);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load complaint.");
+      setError(err.response?.data?.message || "Failed to load complaint details.");
     } finally {
       setLoading(false);
     }
@@ -44,7 +43,7 @@ export default function ComplaintDetail() {
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
-    if (feedbackRating < 1) return setFeedbackError("Please select a rating.");
+    if (feedbackRating < 1) return setFeedbackError("Please select a star rating.");
     setFeedbackLoading(true);
     setFeedbackError("");
     try {
@@ -68,8 +67,9 @@ export default function ComplaintDetail() {
   if (loading) {
     return (
       <DashboardShell>
-        <div className="flex justify-center py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="h-10 w-10 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
+          <p className="mt-4 text-xs font-semibold text-surface-200/50">Loading complaint history...</p>
         </div>
       </DashboardShell>
     );
@@ -79,9 +79,12 @@ export default function ComplaintDetail() {
     return (
       <DashboardShell>
         <div className="animate-fade-in-up py-20 text-center">
-          <p className="text-lg text-red-400">{error || "Complaint not found."}</p>
-          <button onClick={() => navigate(-1)} className="mt-4 cursor-pointer text-sm text-brand-400 hover:text-brand-300">
-            ← Go back
+          <p className="text-base font-bold text-red-400">{error || "Complaint record not found."}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-brand-300 hover:bg-white/10"
+          >
+            ← Return to Dashboard
           </button>
         </div>
       </DashboardShell>
@@ -89,62 +92,67 @@ export default function ComplaintDetail() {
   }
 
   const cfg = STATUS_CONFIG[complaint.status] || STATUS_CONFIG.open;
-  const canFeedback =
-    ["resolved", "closed"].includes(complaint.status) && !feedbackSubmitted;
+  const canFeedback = ["resolved", "closed"].includes(complaint.status) && !feedbackSubmitted;
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-3xl animate-fade-in-up">
-        {/* Back button */}
+      <div className="mx-auto max-w-4xl animate-fade-in-up space-y-6">
+        {/* Back navigation button */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 flex cursor-pointer items-center gap-1.5 text-sm text-surface-200/50 transition hover:text-brand-400"
+          className="group flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-surface-200/70 transition hover:bg-white/10 hover:text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to complaints
+          Back to Overview
         </button>
 
-        {/* ── Main card ────────────────────────────────────────────── */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-          {/* Title + status */}
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-xl font-bold text-white">{complaint.title}</h1>
-              <p className="mt-1 text-xs text-surface-200/50">
-                {complaint.category || "Uncategorized"} · Submitted {formatDate(complaint.createdAt)}
-                {complaint.isAnonymous && " · 🕶 Anonymous"}
+        {/* ── Main Detail Card ────────────────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/90 p-8 shadow-2xl backdrop-blur-xl">
+          {/* Header */}
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-6">
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-300">
+                Department: {complaint.department?.name || "General"}
+              </span>
+              <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                {complaint.title}
+              </h1>
+              <p className="text-xs text-surface-200/50">
+                Category: <span className="text-surface-100 font-medium">{complaint.category || "Uncategorized"}</span> · Filed on {formatDate(complaint.createdAt)}
+                {complaint.isAnonymous && <span className="ml-2 font-bold text-amber-400">🕶 Anonymous Submission</span>}
               </p>
             </div>
-            <span className={`rounded-full px-3 py-1 text-sm font-medium ${cfg.bg} ${cfg.text}`}>
+            <span className={`rounded-full border px-4 py-1.5 text-xs font-bold ${cfg.bg} ${cfg.text}`}>
               {cfg.label}
             </span>
           </div>
 
-          {/* Description */}
-          <div className="mt-6 rounded-xl border border-white/5 bg-white/[0.02] p-4">
-            <p className="text-sm leading-relaxed text-surface-200/80 whitespace-pre-wrap">
+          {/* Description Content */}
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-surface-200/60">Issue Description</h3>
+            <p className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap">
               {complaint.description}
             </p>
           </div>
 
-          {/* Meta grid */}
+          {/* Meta Grid */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <MetaCard label="Urgency" value={complaint.urgency || "medium"} />
-            <MetaCard label="Department" value={complaint.department?.name || "Unassigned"} />
-            <MetaCard label="SLA Deadline" value={complaint.slaDeadline ? formatDate(complaint.slaDeadline) : "—"} />
+            <MetaCard label="Urgency Level" value={complaint.urgency || "medium"} isUrgency />
+            <MetaCard label="Routed Department" value={complaint.department?.name || "Unassigned"} />
+            <MetaCard label="Target SLA Deadline" value={complaint.slaDeadline ? formatDate(complaint.slaDeadline) : "—"} />
           </div>
 
           {/* Attachments */}
           {complaint.attachments?.length > 0 && (
-            <div className="mt-6">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-surface-200/40">Attachments</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-6 border-t border-white/10 pt-6">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-surface-200/60">Attached Files</p>
+              <div className="flex flex-wrap gap-2.5">
                 {complaint.attachments.map((a, i) => (
                   <span
                     key={i}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-surface-200/70"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-surface-200"
                   >
                     📎 {a}
                   </span>
@@ -154,25 +162,26 @@ export default function ComplaintDetail() {
           )}
         </div>
 
-        {/* ── Status Timeline ──────────────────────────────────────── */}
+        {/* ── Status Progression Timeline ───────────────────────────── */}
         {complaint.statusHistory?.length > 0 && (
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-surface-200/50">Status Timeline</h2>
-            <div className="relative ml-3 border-l border-white/10 pl-6">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/90 p-8 shadow-2xl backdrop-blur-xl">
+            <h2 className="mb-6 text-base font-extrabold uppercase tracking-wider text-white">Status Timeline</h2>
+            <div className="relative ml-3 border-l-2 border-brand-500/30 pl-6 space-y-6">
               {complaint.statusHistory.map((entry, i) => {
                 const entryCfg = STATUS_CONFIG[entry.to] || STATUS_CONFIG.open;
                 return (
-                  <div key={i} className="relative mb-5 last:mb-0">
-                    {/* Dot */}
-                    <span className={`absolute -left-[31px] top-0.5 h-3 w-3 rounded-full border-2 border-surface-900 ${entryCfg.dot}`} />
-                    <p className="text-sm text-surface-100">
-                      <span className="text-surface-200/50">{STATUS_CONFIG[entry.from]?.label || entry.from}</span>
-                      <span className="mx-1.5 text-surface-200/30">→</span>
-                      <span className={`font-medium ${entryCfg.text}`}>{entryCfg.label}</span>
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-surface-200/40">
-                      {formatDateTime(entry.changedAt)}
-                    </p>
+                  <div key={i} className="relative">
+                    <span className={`absolute -left-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-[#080d20] ${entryCfg.dot} shadow`} />
+                    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
+                      <p className="text-sm font-bold text-white">
+                        <span className="text-surface-200/50">{STATUS_CONFIG[entry.from]?.label || entry.from}</span>
+                        <span className="mx-2 text-brand-400">→</span>
+                        <span className={entryCfg.text}>{entryCfg.label}</span>
+                      </p>
+                      <p className="mt-1 text-xs text-surface-200/50">
+                        Updated: {formatDateTime(entry.changedAt)}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
@@ -180,29 +189,31 @@ export default function ComplaintDetail() {
           </div>
         )}
 
-        {/* ── Feedback Form ────────────────────────────────────────── */}
+        {/* ── Star Feedback Section (for resolved complaints) ───────── */}
         {feedbackSubmitted ? (
-          <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6 text-center">
-            <p className="text-sm font-medium text-emerald-300">
-              ✓ Thank you for your feedback!
-            </p>
+          <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-xl animate-fade-in-up">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-xl">
+              ✓
+            </div>
+            <h3 className="mt-3 text-lg font-bold text-emerald-300">Thank you for your feedback!</h3>
+            <p className="mt-1 text-xs text-emerald-200/70">Your rating helps improve campus service standards.</p>
           </div>
         ) : canFeedback ? (
           <form
             onSubmit={handleFeedbackSubmit}
-            className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
+            className="relative overflow-hidden rounded-3xl border border-brand-500/30 bg-gradient-to-br from-indigo-950/70 via-[#080d20] to-[#080d20] p-8 shadow-2xl backdrop-blur-xl"
           >
-            <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-surface-200/50">Rate Your Experience</h2>
-            <p className="mb-4 text-xs text-surface-200/40">Your complaint has been resolved. How was the handling?</p>
+            <h2 className="text-lg font-extrabold text-white">Rate Resolution Quality</h2>
+            <p className="mt-1 text-xs text-indigo-200/70">This complaint has been marked as resolved. How satisfied are you with the outcome?</p>
 
             {feedbackError && (
-              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300">
+              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
                 {feedbackError}
               </div>
             )}
 
-            {/* Star rating */}
-            <div className="mb-4 flex gap-1">
+            {/* Interactive Stars */}
+            <div className="my-5 flex items-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -210,13 +221,13 @@ export default function ComplaintDetail() {
                   onMouseEnter={() => setFeedbackHover(star)}
                   onMouseLeave={() => setFeedbackHover(0)}
                   onClick={() => setFeedbackRating(star)}
-                  className="cursor-pointer p-0.5 transition-transform hover:scale-110"
+                  className="cursor-pointer p-1 transition-transform hover:scale-125"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-8 w-8 transition ${
+                    className={`h-9 w-9 transition-colors ${
                       star <= (feedbackHover || feedbackRating)
-                        ? "fill-amber-400 text-amber-400"
+                        ? "fill-amber-400 text-amber-400 filter drop-shadow(0 0 8px rgba(251,191,36,0.5))"
                         : "fill-none text-surface-200/30"
                     }`}
                     viewBox="0 0 24 24"
@@ -234,16 +245,16 @@ export default function ComplaintDetail() {
               rows={3}
               value={feedbackComment}
               onChange={(e) => setFeedbackComment(e.target.value)}
-              placeholder="Any comments? (optional)"
-              className="mb-4 w-full resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-surface-200/40 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25"
+              placeholder="Any comments regarding staff responsiveness or issue fix? (optional)..."
+              className="mb-4 w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
             />
 
             <button
               type="submit"
               disabled={feedbackLoading || feedbackRating < 1}
-              className="cursor-pointer rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              className="cursor-pointer rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {feedbackLoading ? "Sending…" : "Submit Feedback"}
+              {feedbackLoading ? "Submitting..." : "Submit Experience Feedback"}
             </button>
           </form>
         ) : null}
@@ -252,11 +263,13 @@ export default function ComplaintDetail() {
   );
 }
 
-function MetaCard({ label, value }) {
+function MetaCard({ label, value, isUrgency }) {
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-surface-200/40">{label}</p>
-      <p className="mt-1 text-sm font-medium capitalize text-surface-100">{value}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-surface-200/50">{label}</p>
+      <p className={`mt-1.5 text-sm font-bold capitalize ${isUrgency ? "text-amber-400" : "text-white"}`}>
+        {value}
+      </p>
     </div>
   );
 }

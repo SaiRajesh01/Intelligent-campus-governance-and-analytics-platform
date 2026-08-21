@@ -116,8 +116,8 @@ export default function Register() {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-black tracking-tight text-white">SCGIS</h2>
-            <p className="text-xs font-medium text-white/70">Smart Campus Governance</p>
+            <h2 className="text-xl font-black tracking-tight text-white">BBC</h2>
+            <p className="text-xs font-medium text-white/70">BrightBridge Campus</p>
           </div>
         </div>
 

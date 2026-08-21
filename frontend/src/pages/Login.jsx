@@ -56,22 +56,22 @@ export default function Login() {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-black tracking-tight text-white">SCGIS</h2>
-            <p className="text-xs font-medium text-white/70">Smart Campus Governance</p>
+            <h2 className="text-xl font-black tracking-tight text-white">BBC</h2>
+            <p className="text-xs font-medium text-white/70">BrightBridge Campus</p>
           </div>
         </div>
 
         {/* Middle Hero Content */}
         <div className="relative z-10 my-auto py-10">
           {/* Starburst icon inspired by reference */}
-          <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white shadow-xl backdrop-blur-xl transition hover:rotate-12 hover:scale-105">
+          {/* <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white shadow-xl backdrop-blur-xl transition hover:rotate-12 hover:scale-105">
             <span className="text-3xl font-black">✻</span>
-          </div>
+          </div> */}
 
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white leading-tight">
-            Hello <br />
+            Welcome to <br />
             <span className="bg-gradient-to-r from-white via-indigo-100 to-blue-200 bg-clip-text text-transparent">
-              SCGIS! 👋
+              BrightBridge Campus! 
             </span>
           </h1>
 
@@ -79,28 +79,8 @@ export default function Login() {
             Empower your university experience. Submit grievances, track SLA countdowns in real-time, and accelerate resolutions with automated department workflows.
           </p>
 
-          {/* Interactive Feature Pills */}
-          <div className="mt-8 flex flex-wrap gap-2.5">
-            {[
-              "⚡ AI Auto-Routing",
-              "⏱ 48h SLA Tracking",
-              "🕶 Anonymous Mode",
-              "📊 Live Leaderboards",
-            ].map((tag) => (
-              <span
-                key={tag}
-                className="rounded-xl border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
 
-        {/* Footer */}
-        <div className="relative z-10 text-xs font-medium text-indigo-200/60">
-          © 2026 SCGIS Platform. All rights reserved.
-        </div>
       </div>
 
       {/* ── Right Form Container ──────────────────────────────────────── */}
@@ -120,7 +100,7 @@ export default function Login() {
           {/* Form Header */}
           <div className="mb-8">
             <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Welcome Back!
+              BrightBridge Campus
             </h2>
             <p className="mt-2 text-sm text-surface-200/70">
               Don&apos;t have an account?{" "}
@@ -237,7 +217,7 @@ export default function Login() {
             {/* Social / SSO Row (inspired by reference image) */}
             <div className="relative my-4 flex items-center justify-center">
               <div className="w-full border-t border-white/10" />
-              <span className="absolute bg-surface-950 px-3 text-xs uppercase tracking-wider text-surface-200/40">
+              <span className="absolute bg-surface-950 px-3 text-xs uppercase tracking-wider text-surface-200/40" >
                 or campus identity
               </span>
             </div>
