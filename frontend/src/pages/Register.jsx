@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { useTheme, useAuthTheme } from "../context/ThemeContext";
 
 const ROLES = [
   {
@@ -42,8 +43,9 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { lightMode, toggleTheme } = useTheme();
+  const t = useAuthTheme();
 
-  // Fetch departments for departmentHead role
   useEffect(() => {
     (async () => {
       try {
@@ -95,10 +97,9 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-surface-950 text-white selection:bg-brand-500 selection:text-white">
-      {/* ── Left Hero Showcase (Split Screen) ─────────────────────────── */}
+    <div className={`flex min-h-screen w-full transition-colors duration-500 ${t.pageBg} selection:bg-brand-500 selection:text-white`}>
+      {/* ── Left Hero ── */}
       <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-700 via-brand-600 to-blue-900 p-12 text-white">
-        {/* Background geometric accents */}
         <div className="pointer-events-none absolute inset-0 opacity-20">
           <svg className="h-full w-full" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="400" cy="400" r="300" stroke="white" strokeWidth="1.5" strokeDasharray="6 6" />
@@ -108,7 +109,6 @@ export default function Register() {
           </svg>
         </div>
 
-        {/* Top Header Badge */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-inner backdrop-blur-md">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -121,92 +121,65 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Middle Hero Content */}
         <div className="relative z-10 my-auto py-10">
-          <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white shadow-xl backdrop-blur-xl transition hover:rotate-12 hover:scale-105">
-            <span className="text-3xl font-black">✻</span>
-          </div>
-
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white leading-tight">
-            Join <br />
+            Welcome to <br />
             <span className="bg-gradient-to-r from-white via-indigo-100 to-blue-200 bg-clip-text text-transparent">
-              SCGIS Portal! 🚀
+              BrightBridge Campus!
             </span>
           </h1>
-
           <p className="mt-6 max-w-md text-base leading-relaxed text-indigo-100/90 sm:text-lg">
             Create your profile to participate in a transparent campus ecosystem. Connect directly with departmental authorities and track every complaint transparently.
           </p>
-
-          {/* Interactive Feature Pills */}
-          <div className="mt-8 flex flex-wrap gap-2.5">
-            {[
-              "🎓 Student & Faculty Access",
-              "🏢 Department Direct Routing",
-              "🔔 Instant Notification Alerts",
-              "🌟 Star Rating Feedback",
-            ].map((tag) => (
-              <span
-                key={tag}
-                className="rounded-xl border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+         
         </div>
 
-        {/* Footer */}
-        <div className="relative z-10 text-xs font-medium text-indigo-200/60">
-          © 2026 SCGIS Platform. All rights reserved.
-        </div>
       </div>
 
-      {/* ── Right Form Container ──────────────────────────────────────── */}
-      <div className="flex w-full lg:w-1/2 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-20">
+      {/* ── Right Form ── */}
+      <div className="flex w-full lg:w-1/2 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-20 transition-colors duration-500">
         <div className="mx-auto w-full max-w-md animate-fade-in-up">
-          {/* Mobile Brand Header */}
+          {/* Mobile brand */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-lg shadow-brand-500/25">
-              SC
-            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-lg shadow-brand-500/25">SC</div>
             <div>
-              <p className="text-base font-bold text-white tracking-tight">SCGIS</p>
-              <p className="text-xs text-surface-200/50">Campus Governance</p>
+              <p className={`text-base font-bold tracking-tight ${t.heading}`}>SCGIS</p>
+              <p className={`text-xs ${t.footer}`}>Campus Governance</p>
             </div>
           </div>
 
-          {/* Form Header */}
-          <div className="mb-6">
-            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          {/* Header + toggle */}
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <h2 className={`text-3xl font-extrabold tracking-tight sm:text-4xl ${t.heading}`}>
               Create Account
             </h2>
-            <p className="mt-2 text-sm text-surface-200/70">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-semibold text-brand-400 underline underline-offset-4 transition hover:text-brand-300"
-              >
-                Sign in to your account
-              </Link>
-            </p>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`relative mt-1 flex h-8 w-14 flex-shrink-0 cursor-pointer items-center rounded-full border border-white/10 px-1 transition-colors duration-300 ${t.toggleBg}`}
+              aria-label="Toggle light/dark mode"
+            >
+              <span className={`flex h-6 w-6 items-center justify-center rounded-full shadow-md transition-all duration-300 ${t.toggleDot} ${lightMode ? "translate-x-5" : "translate-x-0"}`}>
+                <span className="text-sm">{lightMode ? "☀️" : "🌙"}</span>
+              </span>
+            </button>
           </div>
 
-          {/* Error Alert */}
+          {/* Error */}
           {error && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <div className={`mb-6 flex items-start gap-3 rounded-xl border p-4 text-sm ${t.errorBg}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" className={`mt-0.5 h-5 w-5 flex-shrink-0 ${t.errorIcon}`} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <span>{error}</span>
             </div>
           )}
 
-          {/* Registration Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Role Selection Switcher */}
+            {/* Role Selection */}
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-surface-200/70">
+              <label className={`mb-2 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                 Choose Account Type
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -218,43 +191,34 @@ export default function Register() {
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, role: r.value, department: "" }))}
                       className={`flex cursor-pointer flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
-                        isSelected
-                          ? "border-brand-400 bg-brand-500/20 text-white shadow-lg shadow-brand-500/15 ring-2 ring-brand-500/30"
-                          : "border-white/10 bg-white/5 text-surface-200/60 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                        isSelected ? t.roleSelected : t.roleDefault
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={isSelected ? "text-brand-300" : "text-surface-200/40"}>{r.icon}</span>
+                        <span className={isSelected ? t.roleIconSelected : t.roleIconDefault}>{r.icon}</span>
                         <span className="text-sm font-bold">{r.label}</span>
                       </div>
-                      <span className="text-[11px] text-surface-200/50">{r.subtitle}</span>
+                      <span className={`text-[11px] ${t.roleSubtitle}`}>{r.subtitle}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Department Selection (if Department Head) */}
+            {/* Department (if dept head) */}
             {form.role === "departmentHead" && (
-              <div className="animate-fade-in-up rounded-xl border border-brand-500/30 bg-brand-500/10 p-3.5">
-                <label htmlFor="register-department" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-200">
+              <div className={`animate-fade-in-up rounded-xl border p-3.5 ${t.deptPanel}`}>
+                <label htmlFor="register-department" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wider ${t.deptLabel}`}>
                   Select Your Assigned Department <span className="text-red-400">*</span>
                 </label>
                 <select
-                  id="register-department"
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
-                  required
-                  className="w-full cursor-pointer rounded-lg border border-brand-500/40 bg-surface-900 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-400/30"
+                  id="register-department" name="department"
+                  value={form.department} onChange={handleChange} required
+                  className={`w-full cursor-pointer rounded-lg border px-3.5 py-2.5 text-sm outline-none transition focus:ring-2 ${t.deptSelect}`}
                 >
-                  <option value="" className="bg-surface-900 text-white">
-                    Choose a department (e.g. EEE, Mechanical, CSE, MBA...)
-                  </option>
+                  <option value="" className={t.deptOption}>Choose a department (e.g. EEE, Mechanical, CSE, MBA...)</option>
                   {departments.map((d) => (
-                    <option key={d._id} value={d._id} className="bg-surface-900 text-white">
-                      {d.name}
-                    </option>
+                    <option key={d._id} value={d._id} className={t.deptOption}>{d.name}</option>
                   ))}
                 </select>
               </div>
@@ -262,111 +226,81 @@ export default function Register() {
 
             {/* Full Name */}
             <div>
-              <label htmlFor="register-name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-surface-200/70">
+              <label htmlFor="register-name" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                 Full Name
               </label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-surface-200/40">
+                <div className={`pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 ${t.iconCls}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <input
-                  id="register-name"
-                  name="name"
-                  type="text"
-                  required
-                  autoComplete="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="e.g. Alex Johnson"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-11 pr-4 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
+                  id="register-name" name="name" type="text" required autoComplete="name"
+                  value={form.name} onChange={handleChange} placeholder="e.g. Alex Johnson"
+                  className={`w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm outline-none transition focus:ring-4 ${t.inputCls}`}
                 />
               </div>
             </div>
 
-            {/* Email Address */}
+            {/* Email */}
             <div>
-              <label htmlFor="register-email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-surface-200/70">
+              <label htmlFor="register-email" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                 Campus Email Address
               </label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-surface-200/40">
+                <div className={`pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 ${t.iconCls}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
                   </svg>
                 </div>
                 <input
-                  id="register-email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="you@campus.edu"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-11 pr-4 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
+                  id="register-email" name="email" type="email" required autoComplete="email"
+                  value={form.email} onChange={handleChange} placeholder="you@campus.edu"
+                  className={`w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm outline-none transition focus:ring-4 ${t.inputCls}`}
                 />
               </div>
             </div>
 
-            {/* Password Grid (2 columns on sm) */}
+            {/* Passwords */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label htmlFor="register-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-surface-200/70">
+                <label htmlFor="register-password" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                   Password
                 </label>
-                <div className="relative">
-                  <input
-                    id="register-password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder="Min. 6 chars"
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3.5 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
-                  />
-                </div>
+                <input
+                  id="register-password" name="password"
+                  type={showPassword ? "text" : "password"} required autoComplete="new-password"
+                  value={form.password} onChange={handleChange} placeholder="Min. 6 chars"
+                  className={`w-full rounded-xl border py-2.5 px-3.5 text-sm outline-none transition focus:ring-4 ${t.inputCls}`}
+                />
               </div>
-
               <div>
-                <label htmlFor="register-confirm-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-surface-200/70">
+                <label htmlFor="register-confirm-password" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                   Confirm Password
                 </label>
-                <div className="relative">
-                  <input
-                    id="register-confirm-password"
-                    name="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirm"
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3.5 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
-                  />
-                </div>
+                <input
+                  id="register-confirm-password" name="confirmPassword"
+                  type={showPassword ? "text" : "password"} required autoComplete="new-password"
+                  value={form.confirmPassword} onChange={handleChange} placeholder="Confirm"
+                  className={`w-full rounded-xl border py-2.5 px-3.5 text-sm outline-none transition focus:ring-4 ${t.inputCls}`}
+                />
               </div>
             </div>
 
-            {/* Show Password Toggle */}
+            {/* Show/hide password */}
             <div className="flex items-center justify-end">
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="cursor-pointer text-xs font-medium text-surface-200/60 hover:text-brand-300"
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className={`cursor-pointer text-xs font-medium ${t.showPwBtn}`}
               >
                 {showPassword ? "Hide passwords" : "Show passwords"}
               </button>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
-              type="submit"
-              disabled={loading}
-              className="group relative mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-500 py-3.5 text-sm font-bold text-white shadow-xl shadow-brand-500/25 transition-all hover:brightness-110 hover:shadow-brand-500/40 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              type="submit" disabled={loading}
+              className={`group relative mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${t.btnPrimary}`}
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -375,17 +309,34 @@ export default function Register() {
                 </div>
               ) : (
                 <>
-                  <span>Create Account Now</span>
+                  <span>Create Account</span>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </>
               )}
             </button>
+
+            {/* Divider */}
+            <div className="relative my-4 flex items-center justify-center">
+              <div className={`w-full border-t ${t.dividerLine}`} />
+              <span className={`absolute px-3 text-xs uppercase tracking-wider ${t.dividerBg}`}>or</span>
+            </div>
+
+            {/* Login Button */}
+            <Link
+              to="/login"
+              className={`flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition ${t.loginBtn}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <span>Login</span>
+            </Link>
           </form>
 
-          {/* Footer note */}
-          <div className="mt-6 text-center text-xs text-surface-200/40">
+          {/* Footer */}
+          <div className={`mt-6 text-center text-xs ${t.footer}`}>
             By registering, you agree to SCGIS Campus Code of Conduct and Governance Terms.
           </div>
         </div>

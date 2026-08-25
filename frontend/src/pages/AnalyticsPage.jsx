@@ -6,6 +6,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import DashboardShell from "../components/DashboardShell";
+import { useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 
 const COLORS = [
@@ -13,9 +14,10 @@ const COLORS = [
   "#3b82f6", "#8b5cf6", "#14b8a6", "#ef4444",
 ];
 
-const CHART_CARD = "relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/80 p-7 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20";
+// CHART_CARD is now dynamic via d.panelBg
 
 export default function AnalyticsPage() {
+  const d = useDashboardTheme();
   const [summary, setSummary] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [trends, setTrends] = useState(null);
@@ -80,17 +82,17 @@ export default function AnalyticsPage() {
     <DashboardShell>
       <div className="animate-fade-in-up space-y-8">
         {/* ── Banner ─────────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-r from-indigo-950/70 via-brand-950/50 to-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
+        <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl ${d.bannerBg}`}>
           <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-300">
                 📊 Campus Intelligence & Analytics
               </span>
-              <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              <h1 className={`mt-3 text-3xl font-black tracking-tight sm:text-4xl ${d.bannerHeading}`}>
                 Analytics & Insights
               </h1>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-indigo-200/80 sm:text-base">
+              <p className={`mt-2 max-w-xl text-sm leading-relaxed sm:text-base ${d.bannerSub}`}>
                 Real-time grievance metrics, departmental performance leaderboards, and AI-predicted issue volumes.
               </p>
             </div>
@@ -127,8 +129,8 @@ export default function AnalyticsPage() {
         {/* ── Charts Row 1: Category & Department ────────────────────── */}
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Pie: Complaints by Category */}
-          <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+          <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
+            <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               Complaints by Category
             </h2>
             {categoryData.length === 0 ? (
@@ -152,15 +154,15 @@ export default function AnalyticsPage() {
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <ReTooltip contentStyle={tooltipStyle} />
+                  <ReTooltip contentStyle={d.chartTooltip} />
                 </PieChart>
               </ResponsiveContainer>
             )}
           </div>
 
           {/* Bar: Complaints by Department */}
-          <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+          <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
+            <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               Complaints by Department
             </h2>
             {deptData.length === 0 ? (
@@ -168,10 +170,10 @@ export default function AnalyticsPage() {
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={deptData} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <ReTooltip contentStyle={tooltipStyle} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={d.chartGrid} />
+                  <XAxis type="number" tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                  <ReTooltip contentStyle={d.chartTooltip} />
                   <Bar dataKey="count" fill="#6366f1" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -180,10 +182,10 @@ export default function AnalyticsPage() {
         </div>
 
         {/* ── Charts Row 2: Volume Trend & AI Prediction ─────────────── */}
-        <div className={CHART_CARD}>
+        <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+              <h2 className={`text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
                 Complaint Volume Trend & Forecasting
               </h2>
               <p className="text-xs text-surface-200/50 mt-0.5">Historical submission timeline across campus</p>
@@ -210,10 +212,10 @@ export default function AnalyticsPage() {
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={timelineData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                <ReTooltip contentStyle={tooltipStyle} />
+                <CartesianGrid strokeDasharray="3 3" stroke={d.chartGrid} />
+                <XAxis dataKey="label" tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                <YAxis tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                <ReTooltip contentStyle={d.chartTooltip} />
                 <Line
                   type="monotone"
                   dataKey="count"
@@ -250,8 +252,8 @@ export default function AnalyticsPage() {
         {/* ── Department Leaderboard ──────────────────────────────────── */}
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Gamification Bar Chart */}
-          <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+          <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
+            <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               Department Performance Leaderboard 🏆
             </h2>
             {leaderboardData.length === 0 ? (
@@ -259,10 +261,10 @@ export default function AnalyticsPage() {
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={leaderboardData} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis type="number" domain={[0, 100]} tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <ReTooltip contentStyle={tooltipStyle} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={d.chartGrid} />
+                  <XAxis type="number" domain={[0, 100]} tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                  <YAxis dataKey="name" type="category" width={90} tick={{ fill: d.chartAxis, fontSize: 11 }} />
+                  <ReTooltip contentStyle={d.chartTooltip} />
                   <Bar dataKey="score" name="Score" fill="#6366f1" radius={[0, 8, 8, 0]}>
                     {leaderboardData.map((entry, i) => (
                       <Cell key={i} fill={i === 0 ? "#facc15" : i === 1 ? "#94a3b8" : i === 2 ? "#cd7f32" : "#6366f1"} />
@@ -274,8 +276,8 @@ export default function AnalyticsPage() {
           </div>
 
           {/* SLA Table */}
-          <div className={CHART_CARD}>
-            <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-white">
+          <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
+            <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               SLA Compliance & Resolution Breakdown
             </h2>
             {leaderboardData.length === 0 ? (
@@ -284,7 +286,7 @@ export default function AnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-xs font-bold uppercase tracking-wider text-surface-200/50">
+                    <tr className={`border-b text-xs font-bold uppercase tracking-wider ${d.tableBorder} ${d.tableHeaderText}`}>
                       <th className="px-3 py-2.5">Rank</th>
                       <th className="px-3 py-2.5">Dept</th>
                       <th className="px-3 py-2.5">Resolution</th>
@@ -294,11 +296,11 @@ export default function AnalyticsPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {leaderboardData.map((d, i) => (
-                      <tr key={d.name} className="transition hover:bg-white/[0.02]">
+                      <tr key={d.name} className={`transition ${d.tableRowHover}`}>
                         <td className="px-3 py-3">
                           <RankBadge rank={i + 1} />
                         </td>
-                        <td className="px-3 py-3 font-bold text-white">{d.name}</td>
+                        <td className={`px-3 py-3 font-bold ${d.textPrimary}`}>{d.name}</td>
                         <td className="px-3 py-3">
                           <PercentBar value={d.resolution} color="bg-emerald-500" />
                         </td>
@@ -347,14 +349,7 @@ function PercentBar({ value, color }) {
   );
 }
 
-const tooltipStyle = {
-  backgroundColor: "#0b132b",
-  border: "1px solid rgba(255,255,255,0.15)",
-  borderRadius: "14px",
-  color: "#f1f5f9",
-  fontSize: "12px",
-  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-};
+// tooltipStyle is now dynamic via d.chartTooltip
 
 function monthName(num) {
   return ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][num] || "";

@@ -15,6 +15,7 @@
   --color-brand-700: #4338ca;
   --color-brand-800: #3730a3;
   --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
 
   /* Surface / Dark palette - Rich Deep Sapphire & Slate */
   --color-surface-50:  #f8fafc;
@@ -46,6 +47,19 @@ body {
   background-attachment: fixed;
   color: var(--color-surface-100);
   min-height: 100vh;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+/* Light‑mode overrides — applied when ThemeContext sets lightMode */
+body:has([data-light-mode="true"]) {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 40%, #eef2ff 100%);
+  color: #0f172a;
+}
+body:has([data-light-mode="true"]) ::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.9);
+}
+body:has([data-light-mode="true"]) ::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
 }
 
 /* ── Custom Scrollbars ───────────────────────────────────────────────── */

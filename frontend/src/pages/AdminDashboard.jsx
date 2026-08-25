@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DashboardShell from "../components/DashboardShell";
+import { useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 
 const STATUS_OPTIONS = ["open", "in-progress", "escalated", "resolved", "closed"];
@@ -22,6 +23,7 @@ const FILTER_OPTIONS = [
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const d = useDashboardTheme();
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +128,7 @@ export default function AdminDashboard() {
               <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-300">
                 ⚙️ Master Governance Console
               </span>
-              <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              <h1 className={`mt-3 text-3xl font-black tracking-tight sm:text-4xl ${d.bannerHeading}`}>
                 Campus Admin Dashboard
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
@@ -200,11 +202,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── Master Complaints Table Card ───────────────────────────── */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/80 p-7 shadow-2xl backdrop-blur-xl">
+        <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-colors duration-500 ${d.panelBg}`}>
           {/* Toolbar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
-              <h2 className="text-xl font-extrabold tracking-tight text-white">All Campus Complaints</h2>
+              <h2 className={`text-xl font-extrabold tracking-tight ${d.panelHeading}`}>All Campus Complaints</h2>
               <p className="text-xs text-surface-200/60 mt-0.5">Filter, inspect, bulk-update status, or delete invalid records</p>
             </div>
 
@@ -289,7 +291,7 @@ export default function AdminDashboard() {
                     <th className="px-4 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className={`divide-y ${d.tableBorder}`}>
                   {complaints.map((c) => {
                     const cfg = STATUS_CONFIG[c.status] || STATUS_CONFIG.open;
                     return (

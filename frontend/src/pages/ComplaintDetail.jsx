@@ -2,6 +2,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import DashboardShell from "../components/DashboardShell";
+import { useDashboardTheme } from "../context/ThemeContext";
 
 const STATUS_CONFIG = {
   open:          { label: "Open",        bg: "bg-slate-500/15 border-slate-500/30",   text: "text-slate-300",   dot: "bg-slate-400" },
@@ -14,6 +15,7 @@ const STATUS_CONFIG = {
 export default function ComplaintDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const d = useDashboardTheme();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

@@ -1,6 +1,7 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import NotificationToast from "./components/NotificationToast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
@@ -28,74 +29,76 @@ function RootRedirect() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <NotificationProvider>
-          {/* Global toast overlay */}
-          <NotificationToast />
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            {/* Global toast overlay */}
+            <NotificationToast />
 
-          <Routes>
-            {/* Default entry point: Always lands on Login page */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Routes>
+              {/* Default entry point: Always lands on Login page */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Protected: Student */}
-            <Route
-              path="/student-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["student"]}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected: Student */}
+              <Route
+                path="/student-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected: Complaint Detail (any authenticated user) */}
-            <Route
-              path="/complaints/:id"
-              element={
-                <ProtectedRoute>
-                  <ComplaintDetail />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected: Complaint Detail (any authenticated user) */}
+              <Route
+                path="/complaints/:id"
+                element={
+                  <ProtectedRoute>
+                    <ComplaintDetail />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected: Department Head */}
-            <Route
-              path="/department-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["departmentHead"]}>
-                  <DepartmentDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected: Department Head */}
+              <Route
+                path="/department-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["departmentHead"]}>
+                    <DepartmentDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected: Admin */}
-            <Route
-              path="/admin-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected: Admin */}
+              <Route
+                path="/admin-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected: Analytics (admin + departmentHead) */}
-            <Route
-              path="/analytics"
-              element={
-                <ProtectedRoute allowedRoles={["admin", "departmentHead"]}>
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected: Analytics (admin + departmentHead) */}
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "departmentHead"]}>
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Catch-all: redirect to login or role dashboard */}
-            <Route path="*" element={<RootRedirect />} />
-          </Routes>
-        </NotificationProvider>
-      </AuthProvider>
+              {/* Catch-all: redirect to login or role dashboard */}
+              <Route path="*" element={<RootRedirect />} />
+            </Routes>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

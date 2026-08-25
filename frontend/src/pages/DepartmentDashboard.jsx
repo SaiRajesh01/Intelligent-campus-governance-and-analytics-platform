@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DashboardShell from "../components/DashboardShell";
+import { useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 
 const STATUS_OPTIONS = ["open", "in-progress", "escalated", "resolved", "closed"];
@@ -24,6 +25,7 @@ const ESCALATION_LABELS = ["Standard", "Dept Level 1", "Admin Escalated"];
 export default function DepartmentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const d = useDashboardTheme();
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,10 +80,10 @@ export default function DepartmentDashboard() {
               <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-300">
                 🏢 Department Staff Dashboard
               </span>
-              <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              <h1 className={`mt-3 text-3xl font-black tracking-tight sm:text-4xl ${d.bannerHeading}`}>
                 {user?.department?.name ? `${user.department.name} Department` : "Department Console"}
               </h1>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-indigo-200/80 sm:text-base">
+              <p className={`mt-2 max-w-xl text-sm leading-relaxed sm:text-base ${d.bannerSub}`}>
                 Manage routed student grievances, track SLA compliance deadlines, update resolution statuses, and prevent administrative escalations.
               </p>
             </div>
@@ -119,7 +121,7 @@ export default function DepartmentDashboard() {
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/80 p-7 shadow-2xl backdrop-blur-xl">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
-              <h2 className="text-xl font-extrabold tracking-tight text-white">Department Queue</h2>
+              <h2 className={`text-xl font-extrabold tracking-tight ${d.panelHeading}`}>Department Queue</h2>
               <p className="text-xs text-surface-200/60 mt-0.5">Complaints assigned for verification and resolution</p>
             </div>
 
