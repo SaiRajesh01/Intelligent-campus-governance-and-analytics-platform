@@ -1,25 +1,55 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useTheme, useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 import DashboardShell from "../components/DashboardShell";
-import { useDashboardTheme } from "../context/ThemeContext";
 
 const STATUS_CONFIG = {
-  open:          { label: "Open",        bg: "bg-slate-500/15 border-slate-500/30",   text: "text-slate-300",   dot: "bg-slate-400" },
-  "in-progress": { label: "In Progress", bg: "bg-blue-500/15 border-blue-500/30",    text: "text-blue-300",    dot: "bg-blue-400" },
-  escalated:     { label: "Escalated",   bg: "bg-orange-500/15 border-orange-500/30",  text: "text-orange-300",  dot: "bg-orange-400" },
-  resolved:      { label: "Resolved",    bg: "bg-emerald-500/15 border-emerald-500/30", text: "text-emerald-300", dot: "bg-emerald-400" },
-  closed:        { label: "Closed",      bg: "bg-purple-500/15 border-purple-500/30",  text: "text-purple-300",  dot: "bg-purple-400" },
+  open: {
+    label: "Open / Unassigned",
+    bg: "bg-blue-500/15 border-blue-500/30",
+    text: "text-blue-400",
+    dot: "bg-blue-400",
+  },
+  "in-progress": {
+    label: "In Progress",
+    bg: "bg-amber-500/15 border-amber-500/30",
+    text: "text-amber-400",
+    dot: "bg-amber-400",
+  },
+  escalated: {
+    label: "Escalated",
+    bg: "bg-red-500/15 border-red-500/30",
+    text: "text-red-400",
+    dot: "bg-red-400",
+  },
+  resolved: {
+    label: "Resolved",
+    bg: "bg-emerald-500/15 border-emerald-500/30",
+    text: "text-emerald-400",
+    dot: "bg-emerald-400",
+  },
+  closed: {
+    label: "Closed",
+    bg: "bg-slate-500/15 border-slate-500/30",
+    text: "text-slate-400",
+    dot: "bg-slate-400",
+  },
 };
 
 export default function ComplaintDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { lightMode } = useTheme();
   const d = useDashboardTheme();
+
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Feedback form state (students rating resolved complaints)
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackHover, setFeedbackHover] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState("");
@@ -28,50 +58,50 @@ export default function ComplaintDetail() {
   const [feedbackError, setFeedbackError] = useState("");
 
   useEffect(() => {
-    fetchComplaint();
+    (async () => {
+      try {
+        const { data } = await api.get(`/complaints/${id}`);
+        setComplaint(data);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load complaint details.");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [id]);
-
-  const fetchComplaint = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get(`/complaints/${id}`);
-      setComplaint(data);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load complaint details.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
-    if (feedbackRating < 1) return setFeedbackError("Please select a star rating.");
+    if (feedbackRating < 1) {
+      setFeedbackError("Please select a star rating between 1 and 5.");
+      return;
+    }
     setFeedbackLoading(true);
     setFeedbackError("");
     try {
-      await api.post(`/complaints/${id}/feedback`, {
+      await api.post("/feedback", {
+        complaintId: id,
         rating: feedbackRating,
-        comment: feedbackComment.trim() || undefined,
+        comment: feedbackComment,
       });
       setFeedbackSubmitted(true);
     } catch (err) {
-      const msg = err.response?.data?.message || "Failed to submit feedback.";
-      if (msg.includes("already submitted")) {
-        setFeedbackSubmitted(true);
-      } else {
-        setFeedbackError(msg);
-      }
+      setFeedbackError(err.response?.data?.message || "Failed to submit feedback.");
     } finally {
       setFeedbackLoading(false);
     }
   };
 
+  const cfg = STATUS_CONFIG[complaint?.status] || STATUS_CONFIG.open;
+  const isOwner = complaint?.submittedBy?._id === user?._id;
+  const isResolved = complaint?.status === "resolved" || complaint?.status === "closed";
+  const canFeedback = user?.role === "student" && isOwner && isResolved;
+
   if (loading) {
     return (
       <DashboardShell>
-        <div className="flex flex-col items-center justify-center py-24">
-          <div className="h-10 w-10 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
-          <p className="mt-4 text-xs font-semibold text-surface-200/50">Loading complaint history...</p>
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
         </div>
       </DashboardShell>
     );
@@ -80,81 +110,98 @@ export default function ComplaintDetail() {
   if (error || !complaint) {
     return (
       <DashboardShell>
-        <div className="animate-fade-in-up py-20 text-center">
-          <p className="text-base font-bold text-red-400">{error || "Complaint record not found."}</p>
+        <div className={`rounded-2xl border p-8 text-center backdrop-blur-xl ${lightMode ? "border-red-300 bg-red-50 text-red-700" : "border-red-500/30 bg-red-500/10 text-red-300"}`}>
+          <p className="font-bold">{error || "Complaint record could not be found."}</p>
           <button
             onClick={() => navigate(-1)}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-brand-300 hover:bg-white/10"
+            className="mt-4 cursor-pointer rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-brand-500"
           >
-            ← Return to Dashboard
+            Go Back
           </button>
         </div>
       </DashboardShell>
     );
   }
 
-  const cfg = STATUS_CONFIG[complaint.status] || STATUS_CONFIG.open;
-  const canFeedback = ["resolved", "closed"].includes(complaint.status) && !feedbackSubmitted;
-
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-4xl animate-fade-in-up space-y-6">
-        {/* Back navigation button */}
+      <div className="mx-auto max-w-4xl space-y-8 animate-fade-in-up">
+        {/* Back Link */}
         <button
           onClick={() => navigate(-1)}
-          className="group flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-surface-200/70 transition hover:bg-white/10 hover:text-white"
+          className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold backdrop-blur-md transition ${
+            lightMode
+              ? "border-slate-200 bg-white text-slate-700 hover:border-brand-400 hover:bg-slate-50 shadow-sm"
+              : "border-white/10 bg-white/5 text-surface-200 hover:border-brand-500/40 hover:bg-brand-500/10 hover:text-white"
+          }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to Overview
+          Back to Dashboard
         </button>
 
-        {/* ── Main Detail Card ────────────────────────────────────────── */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/90 p-8 shadow-2xl backdrop-blur-xl">
-          {/* Header */}
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-6">
-            <div className="space-y-1.5">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-300">
-                Department: {complaint.department?.name || "General"}
-              </span>
-              <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+        {/* ── Main Details Card ──────────────────────────────────────── */}
+        <div className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-all ${d.panelBg}`}>
+          {/* Header Row */}
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-6" style={{ borderColor: lightMode ? "#e2e8f0" : "rgba(255,255,255,0.1)" }}>
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-brand-500/15 border border-brand-500/30 px-2.5 py-0.5 text-xs font-bold text-brand-500">
+                  {complaint.category || "General Issue"}
+                </span>
+                <span className={`text-xs ${d.textMuted}`}>
+                  ID: #{complaint._id.slice(-6).toUpperCase()}
+                </span>
+              </div>
+              <h1 className={`text-2xl font-extrabold tracking-tight sm:text-3xl ${d.panelHeading}`}>
                 {complaint.title}
               </h1>
-              <p className="text-xs text-surface-200/50">
-                Category: <span className="text-surface-100 font-medium">{complaint.category || "Uncategorized"}</span> · Filed on {formatDate(complaint.createdAt)}
-                {complaint.isAnonymous && <span className="ml-2 font-bold text-amber-400">🕶 Anonymous Submission</span>}
+              <p className={`text-xs ${d.textMuted}`}>
+                Submitted on {formatDateTime(complaint.createdAt)}
+                {complaint.isAnonymous ? " • Filed Anonymously" : complaint.submittedBy?.name ? ` • By ${complaint.submittedBy.name}` : ""}
               </p>
             </div>
-            <span className={`rounded-full border px-4 py-1.5 text-xs font-bold ${cfg.bg} ${cfg.text}`}>
+
+            {/* Status Badge */}
+            <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-extrabold shadow-sm ${cfg.bg} ${cfg.text}`}>
+              <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
               {cfg.label}
             </span>
           </div>
 
           {/* Description Content */}
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-surface-200/60">Issue Description</h3>
-            <p className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap">
+          <div className={`mt-6 rounded-2xl border p-5 ${
+            lightMode ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/[0.03]"
+          }`}>
+            <h3 className={`mb-2 text-xs font-bold uppercase tracking-wider ${lightMode ? "text-slate-500" : "text-surface-200/60"}`}>
+              Issue Description
+            </h3>
+            <p className={`text-sm leading-relaxed whitespace-pre-wrap ${lightMode ? "text-slate-700" : "text-slate-200"}`}>
               {complaint.description}
             </p>
           </div>
 
           {/* Meta Grid */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <MetaCard label="Urgency Level" value={complaint.urgency || "medium"} isUrgency />
-            <MetaCard label="Routed Department" value={complaint.department?.name || "Unassigned"} />
-            <MetaCard label="Target SLA Deadline" value={complaint.slaDeadline ? formatDate(complaint.slaDeadline) : "—"} />
+            <MetaCard label="Urgency Level" value={complaint.urgency || "medium"} isUrgency lightMode={lightMode} />
+            <MetaCard label="Routed Department" value={complaint.department?.name || "Unassigned"} lightMode={lightMode} />
+            <MetaCard label="Target SLA Deadline" value={complaint.slaDeadline ? formatDate(complaint.slaDeadline) : "—"} lightMode={lightMode} />
           </div>
 
           {/* Attachments */}
           {complaint.attachments?.length > 0 && (
-            <div className="mt-6 border-t border-white/10 pt-6">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-surface-200/60">Attached Files</p>
+            <div className="mt-6 border-t pt-6" style={{ borderColor: lightMode ? "#e2e8f0" : "rgba(255,255,255,0.1)" }}>
+              <p className={`mb-3 text-xs font-bold uppercase tracking-wider ${lightMode ? "text-slate-500" : "text-surface-200/60"}`}>Attached Files</p>
               <div className="flex flex-wrap gap-2.5">
                 {complaint.attachments.map((a, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-surface-200"
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-medium ${
+                      lightMode
+                        ? "border-slate-200 bg-slate-100 text-slate-700"
+                        : "border-white/10 bg-white/5 text-surface-200"
+                    }`}
                   >
                     📎 {a}
                   </span>
@@ -166,21 +213,25 @@ export default function ComplaintDetail() {
 
         {/* ── Status Progression Timeline ───────────────────────────── */}
         {complaint.statusHistory?.length > 0 && (
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d20]/90 p-8 shadow-2xl backdrop-blur-xl">
-            <h2 className="mb-6 text-base font-extrabold uppercase tracking-wider text-white">Status Timeline</h2>
+          <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl transition-all ${d.panelBg}`}>
+            <h2 className={`mb-6 text-base font-extrabold uppercase tracking-wider ${d.panelHeading}`}>Status Timeline</h2>
             <div className="relative ml-3 border-l-2 border-brand-500/30 pl-6 space-y-6">
               {complaint.statusHistory.map((entry, i) => {
                 const entryCfg = STATUS_CONFIG[entry.to] || STATUS_CONFIG.open;
                 return (
                   <div key={i} className="relative">
-                    <span className={`absolute -left-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-[#080d20] ${entryCfg.dot} shadow`} />
-                    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
-                      <p className="text-sm font-bold text-white">
-                        <span className="text-surface-200/50">{STATUS_CONFIG[entry.from]?.label || entry.from}</span>
-                        <span className="mx-2 text-brand-400">→</span>
+                    <span className={`absolute -left-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 ${
+                      lightMode ? "border-white" : "border-[#080d20]"
+                    } ${entryCfg.dot} shadow`} />
+                    <div className={`rounded-xl border p-3.5 ${
+                      lightMode ? "border-slate-200 bg-slate-50 text-slate-800" : "border-white/5 bg-white/[0.02] text-white"
+                    }`}>
+                      <p className="text-sm font-bold">
+                        <span className={lightMode ? "text-slate-500" : "text-surface-200/50"}>{STATUS_CONFIG[entry.from]?.label || entry.from}</span>
+                        <span className="mx-2 text-brand-500">→</span>
                         <span className={entryCfg.text}>{entryCfg.label}</span>
                       </p>
-                      <p className="mt-1 text-xs text-surface-200/50">
+                      <p className={`mt-1 text-xs ${lightMode ? "text-slate-400" : "text-surface-200/50"}`}>
                         Updated: {formatDateTime(entry.changedAt)}
                       </p>
                     </div>
@@ -193,23 +244,31 @@ export default function ComplaintDetail() {
 
         {/* ── Star Feedback Section (for resolved complaints) ───────── */}
         {feedbackSubmitted ? (
-          <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-xl animate-fade-in-up">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-xl">
+          <div className={`rounded-3xl border p-8 text-center backdrop-blur-xl animate-fade-in-up ${
+            lightMode ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+          }`}>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 text-xl font-bold">
               ✓
             </div>
-            <h3 className="mt-3 text-lg font-bold text-emerald-300">Thank you for your feedback!</h3>
-            <p className="mt-1 text-xs text-emerald-200/70">Your rating helps improve campus service standards.</p>
+            <h3 className={`mt-3 text-lg font-bold ${lightMode ? "text-emerald-900" : "text-emerald-300"}`}>Thank you for your feedback!</h3>
+            <p className={`mt-1 text-xs ${lightMode ? "text-emerald-700" : "text-emerald-200/70"}`}>Your rating helps improve campus service standards.</p>
           </div>
         ) : canFeedback ? (
           <form
             onSubmit={handleFeedbackSubmit}
-            className="relative overflow-hidden rounded-3xl border border-brand-500/30 bg-gradient-to-br from-indigo-950/70 via-[#080d20] to-[#080d20] p-8 shadow-2xl backdrop-blur-xl"
+            className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl ${
+              lightMode
+                ? "border-brand-200 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 shadow-slate-900/5"
+                : "border-brand-500/30 bg-gradient-to-br from-indigo-950/70 via-[#080d20] to-[#080d20] shadow-black/50"
+            }`}
           >
-            <h2 className="text-lg font-extrabold text-white">Rate Resolution Quality</h2>
-            <p className="mt-1 text-xs text-indigo-200/70">This complaint has been marked as resolved. How satisfied are you with the outcome?</p>
+            <h2 className={`text-lg font-extrabold ${lightMode ? "text-slate-900" : "text-white"}`}>Rate Resolution Quality</h2>
+            <p className={`mt-1 text-xs ${lightMode ? "text-slate-600" : "text-indigo-200/70"}`}>This complaint has been marked as resolved. How satisfied are you with the outcome?</p>
 
             {feedbackError && (
-              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+              <div className={`mt-4 rounded-xl border p-3 text-xs ${
+                lightMode ? "border-red-300 bg-red-50 text-red-700" : "border-red-500/30 bg-red-500/10 text-red-300"
+              }`}>
                 {feedbackError}
               </div>
             )}
@@ -224,12 +283,15 @@ export default function ComplaintDetail() {
                   onMouseLeave={() => setFeedbackHover(0)}
                   onClick={() => setFeedbackRating(star)}
                   className="cursor-pointer p-1 transition-transform hover:scale-125"
+                  aria-label={`Rate ${star} stars`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`h-9 w-9 transition-colors ${
                       star <= (feedbackHover || feedbackRating)
                         ? "fill-amber-400 text-amber-400 filter drop-shadow(0 0 8px rgba(251,191,36,0.5))"
+                        : lightMode
+                        ? "fill-none text-slate-300"
                         : "fill-none text-surface-200/30"
                     }`}
                     viewBox="0 0 24 24"
@@ -248,7 +310,11 @@ export default function ComplaintDetail() {
               value={feedbackComment}
               onChange={(e) => setFeedbackComment(e.target.value)}
               placeholder="Any comments regarding staff responsiveness or issue fix? (optional)..."
-              className="mb-4 w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white placeholder-surface-200/30 outline-none transition focus:border-brand-400 focus:bg-white/[0.08] focus:ring-4 focus:ring-brand-500/20"
+              className={`mb-4 w-full resize-none rounded-xl border p-4 text-sm outline-none transition focus:ring-4 ${
+                lightMode
+                  ? "border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-brand-500/20"
+                  : "border-white/10 bg-white/[0.04] text-white placeholder-surface-200/30 focus:border-brand-400 focus:bg-white/[0.08] focus:ring-brand-500/20"
+              }`}
             />
 
             <button
@@ -265,11 +331,19 @@ export default function ComplaintDetail() {
   );
 }
 
-function MetaCard({ label, value, isUrgency }) {
+function MetaCard({ label, value, isUrgency, lightMode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-surface-200/50">{label}</p>
-      <p className={`mt-1.5 text-sm font-bold capitalize ${isUrgency ? "text-amber-400" : "text-white"}`}>
+    <div className={`rounded-2xl border p-4 ${
+      lightMode ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/[0.03]"
+    }`}>
+      <p className={`text-[11px] font-bold uppercase tracking-wider ${
+        lightMode ? "text-slate-500" : "text-surface-200/50"
+      }`}>{label}</p>
+      <p className={`mt-1.5 text-sm font-bold capitalize ${
+        isUrgency
+          ? lightMode ? "text-amber-600" : "text-amber-400"
+          : lightMode ? "text-slate-900" : "text-white"
+      }`}>
         {value}
       </p>
     </div>

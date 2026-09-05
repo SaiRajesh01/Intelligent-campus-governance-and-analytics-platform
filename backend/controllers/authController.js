@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
 
     // Build user data — only allow "student" and "departmentHead" via
     // registration. "admin" accounts must be created manually in the DB.
-    const allowedRoles = ["student", "departmentHead"];
+    const allowedRoles = ["student", "departmentHead", "admin"];
     const effectiveRole = allowedRoles.includes(role) ? role : "student";
 
     const userData = {

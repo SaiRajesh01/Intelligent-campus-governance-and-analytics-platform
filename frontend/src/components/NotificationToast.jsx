@@ -1,37 +1,47 @@
 import { useNotifications } from "../context/NotificationContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function NotificationToast() {
-  const { toast, dismissToast } = useNotifications();
+  const { toastNotification, clearToast } = useNotifications();
+  const { lightMode } = useTheme();
 
-  if (!toast) return null;
+  if (!toastNotification) return null;
 
   return (
-    <div className="fixed right-6 top-6 z-[100] animate-fade-in-up w-80">
-      <div className="rounded-2xl border border-white/10 bg-surface-900/95 p-4 shadow-2xl backdrop-blur-xl">
-        <div className="flex items-start gap-3">
-          {/* Icon */}
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-500/15">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-          {/* Message */}
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-brand-300">New Notification</p>
-            <p className="mt-0.5 text-sm leading-snug text-surface-200/80">
-              {toast.message}
-            </p>
-          </div>
-          {/* Dismiss */}
-          <button
-            onClick={dismissToast}
-            className="cursor-pointer flex-shrink-0 rounded-lg p-1 text-surface-200/40 transition hover:text-white"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+    <div className="fixed bottom-6 right-6 z-50 max-w-sm animate-fade-in-up">
+      <div className={`flex items-start gap-3 rounded-2xl border p-4 backdrop-blur-2xl transition-all ${
+        lightMode
+          ? "bg-white/95 border-brand-300 text-slate-800 shadow-2xl shadow-slate-900/15 ring-1 ring-slate-200/60"
+          : "bg-surface-900/95 border-brand-500/40 text-surface-100 shadow-2xl shadow-black/50 ring-1 ring-white/10"
+      }`}>
+        {/* Icon */}
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-500/20 text-brand-500 font-bold">
+          🔔
         </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold uppercase tracking-wider text-brand-500">Live Campus Alert</p>
+          <p className={`mt-0.5 text-xs font-medium leading-relaxed ${lightMode ? "text-slate-700" : "text-surface-200"}`}>
+            {toastNotification.message}
+          </p>
+        </div>
+
+        {/* Dismiss button */}
+        <button
+          onClick={clearToast}
+          className={`cursor-pointer rounded-lg p-1 transition ${
+            lightMode
+              ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              : "text-surface-200/40 hover:bg-white/10 hover:text-white"
+          }`}
+          title="Dismiss notification"
+          aria-label="Dismiss notification"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </div>
   );

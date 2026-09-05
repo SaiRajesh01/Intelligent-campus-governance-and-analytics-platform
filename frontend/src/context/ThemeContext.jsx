@@ -1,19 +1,23 @@
-﻿import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-const ThemeContext = createContext(null);
+const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [lightMode, setLightMode] = useState(() => {
     try {
-      return localStorage.getItem("scgis-theme") === "light";
+      const saved = localStorage.getItem("scgis_theme");
+      return saved === "light";
     } catch {
       return false;
     }
   });
 
   useEffect(() => {
-    localStorage.setItem("scgis-theme", lightMode ? "light" : "dark");
-    document.getElementById("root")?.setAttribute("data-light-mode", lightMode ? "true" : "false");
+    try {
+      localStorage.setItem("scgis_theme", lightMode ? "light" : "dark");
+    } catch {
+      // ignore
+    }
   }, [lightMode]);
 
   const toggleTheme = () => setLightMode((prev) => !prev);
@@ -27,47 +31,50 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  if (!ctx) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
   return ctx;
 }
-
-/* ─── Shared theme‑token helpers ───────────────────────────────────── */
 
 export function useAuthTheme() {
   const { lightMode } = useTheme();
   return lightMode
     ? {
-        pageBg: "bg-gradient-to-br from-slate-50 via-white to-indigo-50",
+        pageBg: "bg-slate-50 text-slate-800",
+        cardBg: "bg-white border-slate-200 shadow-xl",
         heading: "text-slate-900",
-        label: "text-slate-600",
-        inputCls: "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-brand-500/20 focus:bg-white",
+        label: "text-slate-700",
+        inputCls: "bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-brand-500/20 focus:bg-white",
         iconCls: "text-slate-400",
-        errorBg: "border-red-300 bg-red-50 text-red-700",
+        errorBg: "border-red-200 bg-red-50 text-red-700",
         errorIcon: "text-red-500",
         btnPrimary: "bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-500 text-white shadow-xl shadow-brand-500/25 hover:shadow-brand-500/40",
-        btnSecondary: "border-slate-200 bg-slate-50 text-slate-700 hover:border-brand-400 hover:bg-slate-100",
+        btnSecondary: "border-slate-300 bg-white text-slate-700 hover:border-brand-500 hover:bg-slate-50",
         dividerLine: "border-slate-200",
         dividerBg: "bg-white text-slate-400",
-        footer: "text-slate-400",
-        link: "text-brand-600 hover:text-brand-500",
+        footer: "text-slate-500",
+        link: "text-brand-600 hover:text-brand-700",
         toggleBg: "bg-slate-200",
         toggleDot: "bg-white",
         pwIcon: "text-slate-400 hover:text-slate-700",
-        roleSelected: "border-brand-400 bg-brand-50 text-slate-900 shadow-lg shadow-brand-500/10 ring-2 ring-brand-400/30",
-        roleDefault: "border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700",
-        roleIconSelected: "text-brand-500",
+        roleSelected: "border-brand-500 bg-brand-50 text-brand-900 shadow-md ring-2 ring-brand-500/20",
+        roleDefault: "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50",
+        roleIconSelected: "text-brand-600",
         roleIconDefault: "text-slate-400",
-        roleSubtitle: "text-slate-400",
-        deptPanel: "border-brand-300 bg-brand-50",
-        deptLabel: "text-brand-700",
-        deptSelect: "border-brand-300 bg-white text-slate-900 focus:border-brand-500 focus:ring-brand-400/30",
+        roleSubtitle: "text-slate-500",
+        deptPanel: "border-brand-200 bg-brand-50/60",
+        deptLabel: "text-brand-900",
+        deptSelect: "border-slate-300 bg-white text-slate-900 focus:border-brand-500 focus:ring-brand-500/20",
         deptOption: "bg-white text-slate-900",
         showPwBtn: "text-slate-500 hover:text-brand-600",
+        loginBtn: "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400",
       }
     : {
-        pageBg: "bg-surface-950",
+        pageBg: "bg-surface-950 text-surface-100",
+        cardBg: "bg-surface-900/60 border-white/10 shadow-2xl",
         heading: "text-white",
-        label: "text-surface-200/70",
+        label: "text-surface-200/80",
         inputCls: "bg-white/5 border-white/10 text-white placeholder-surface-200/30 focus:border-brand-400 focus:ring-brand-500/20 focus:bg-white/[0.08]",
         iconCls: "text-surface-200/40",
         errorBg: "border-red-500/30 bg-red-500/10 text-red-300",
@@ -91,6 +98,7 @@ export function useAuthTheme() {
         deptSelect: "border-brand-500/40 bg-surface-900 text-white focus:border-brand-300 focus:ring-brand-400/30",
         deptOption: "bg-surface-900 text-white",
         showPwBtn: "text-surface-200/60 hover:text-brand-300",
+        loginBtn: "border-white/15 bg-white/5 text-white hover:bg-white/10 hover:border-white/25",
       };
 }
 
@@ -110,51 +118,51 @@ export function useDashboardTheme() {
         sidebarUserName: "text-slate-900",
         sidebarLogout: "text-slate-400 hover:bg-red-50 hover:text-red-500",
         headerBg: "bg-white/80 border-b border-slate-200",
-        headerText: "text-slate-500",
+        headerText: "text-slate-600",
         statusDot: "bg-emerald-500",
 
         /* Content area */
-        bannerBg: "bg-gradient-to-r from-indigo-100/80 via-brand-50 to-slate-50 border-slate-200",
-        bannerHeading: "text-slate-900",
-        bannerSub: "text-slate-600",
-        bannerPill: "border-brand-300 bg-brand-50 text-brand-700",
+        bannerBg: "bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-slate-800",
+        bannerHeading: "text-white",
+        bannerSub: "text-indigo-100/90",
+        bannerPill: "border-amber-400/40 bg-amber-500/20 text-amber-300",
 
         cardBg: "bg-white border-slate-200 shadow-md",
-        cardLabel: "text-slate-500",
-        cardIcon: "bg-slate-50 ring-1 ring-slate-200",
-        cardMeta: "text-slate-400",
+        cardLabel: "text-slate-600 font-bold",
+        cardIcon: "bg-white/80 text-slate-800 shadow-sm ring-1 ring-slate-200",
+        cardMeta: "text-slate-500 font-medium",
 
         panelBg: "bg-white border-slate-200 shadow-md",
-        panelHeading: "text-slate-900",
+        panelHeading: "text-slate-900 font-extrabold",
         panelSub: "text-slate-500",
         panelBorder: "border-slate-200",
 
         filterBg: "bg-slate-100 border-slate-200",
         filterActive: "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/25",
-        filterInactive: "text-slate-500 hover:text-slate-800",
+        filterInactive: "text-slate-600 hover:text-slate-900 font-medium",
 
         tableBg: "bg-white",
         tableHeaderBg: "bg-slate-50",
-        tableHeaderText: "text-slate-600",
+        tableHeaderText: "text-slate-600 font-bold",
         tableRowHover: "hover:bg-brand-50/50",
         tableText: "text-slate-800",
         tableBorder: "border-slate-100",
 
-        listItemBg: "bg-slate-50/50 border-slate-100 hover:border-brand-300 hover:bg-brand-50/30 hover:shadow-md",
-        listTitle: "text-slate-900 group-hover:text-brand-600",
+        listItemBg: "bg-slate-50/70 border-slate-200 hover:border-brand-400 hover:bg-brand-50/40 hover:shadow-md",
+        listTitle: "text-slate-900 group-hover:text-brand-700",
         listMeta: "text-slate-500",
-        listArrow: "bg-slate-100 text-slate-400 group-hover:bg-brand-100 group-hover:text-brand-600",
+        listArrow: "bg-slate-200 text-slate-600 group-hover:bg-brand-100 group-hover:text-brand-700",
 
-        emptyIcon: "bg-slate-50 border-slate-200",
+        emptyIcon: "bg-slate-100 border-slate-200",
         emptyText: "text-slate-800",
-        emptySub: "text-slate-400",
+        emptySub: "text-slate-500",
 
         textPrimary: "text-slate-900",
         textSecondary: "text-slate-600",
-        textMuted: "text-slate-400",
+        textMuted: "text-slate-500",
 
-        btnPrimary: "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-lg shadow-brand-500/25",
-        btnSecondary: "border-slate-200 bg-white text-slate-700 hover:border-brand-400 hover:bg-slate-50",
+        btnPrimary: "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-lg shadow-brand-500/25 hover:brightness-110",
+        btnSecondary: "border-white/20 bg-white/10 text-white hover:bg-white/20 hover:border-white/30",
 
         inputBg: "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-brand-500/20 focus:bg-white",
         selectBg: "bg-slate-50 border-slate-200 text-slate-900 focus:border-brand-500 focus:ring-brand-500/20",
@@ -162,7 +170,7 @@ export function useDashboardTheme() {
 
         chartTooltip: { backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "14px", color: "#0f172a", fontSize: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.08)" },
         chartGrid: "rgba(0,0,0,0.06)",
-        chartAxis: "#64748b",
+        chartAxis: "#475569",
       }
     : {
         /* Shell */
@@ -181,10 +189,10 @@ export function useDashboardTheme() {
         statusDot: "bg-emerald-400",
 
         /* Content */
-        bannerBg: "bg-gradient-to-r from-indigo-900/80 via-brand-900/50 to-slate-900/80 border-white/15",
+        bannerBg: "bg-gradient-to-r from-amber-950/40 via-indigo-950/60 to-slate-900/90 border-white/15",
         bannerHeading: "text-white",
         bannerSub: "text-indigo-200/80",
-        bannerPill: "border-brand-400/30 bg-brand-500/10 text-brand-300",
+        bannerPill: "border-amber-400/30 bg-amber-500/10 text-amber-300",
 
         cardBg: "bg-indigo-500/10 border-indigo-500/20",
         cardLabel: "text-surface-200/70",
@@ -221,7 +229,7 @@ export function useDashboardTheme() {
         textMuted: "text-surface-200/40",
 
         btnPrimary: "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-lg shadow-brand-500/25",
-        btnSecondary: "border-white/15 bg-white/5 text-white hover:bg-white/10",
+        btnSecondary: "border-white/15 bg-white/5 text-white hover:bg-white/10 hover:border-white/30",
 
         inputBg: "bg-white/5 border-white/10 text-white placeholder-surface-200/30 focus:border-brand-400 focus:ring-brand-500/20 focus:bg-white/[0.08]",
         selectBg: "bg-surface-900 border-brand-500/40 text-white focus:border-brand-300 focus:ring-brand-400/30",

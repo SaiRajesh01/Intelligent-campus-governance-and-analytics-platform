@@ -9,7 +9,6 @@ const NAV_ITEMS = {
   ],
   departmentHead: [
     { label: "Department Queue", path: "/department-dashboard", icon: "🏢" },
-    { label: "Analytics & Trends", path: "/analytics", icon: "📊" },
   ],
   admin: [
     { label: "Management Console", path: "/admin-dashboard", icon: "⚙️" },

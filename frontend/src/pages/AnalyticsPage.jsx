@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   PieChart, Pie, Cell, Tooltip as ReTooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import DashboardShell from "../components/DashboardShell";
-import { useDashboardTheme } from "../context/ThemeContext";
+import { useTheme, useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 
 const COLORS = [
@@ -14,10 +14,9 @@ const COLORS = [
   "#3b82f6", "#8b5cf6", "#14b8a6", "#ef4444",
 ];
 
-// CHART_CARD is now dynamic via d.panelBg
-
 export default function AnalyticsPage() {
   const d = useDashboardTheme();
+  const { lightMode } = useTheme();
   const [summary, setSummary] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [trends, setTrends] = useState(null);
@@ -31,62 +30,77 @@ export default function AnalyticsPage() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [sumRes, lbRes, trRes] = await Promise.all([
+      const [sumRes, leadRes, trendRes] = await Promise.allSettled([
         api.get("/analytics/summary"),
         api.get("/analytics/leaderboard"),
-        api.get(`/analytics/trends?period=${trendPeriod}&window=4`),
+        api.get("/analytics/trends", { params: { period: trendPeriod } }),
       ]);
-      setSummary(sumRes.data);
-      setLeaderboard(lbRes.data);
-      setTrends(trRes.data);
+      if (sumRes.status === "fulfilled") setSummary(sumRes.value.data);
+      if (leadRes.status === "fulfilled") setLeaderboard(leadRes.value.data);
+      if (trendRes.status === "fulfilled") setTrends(trendRes.value.data);
     } catch (err) {
-      console.error("Analytics fetch failed:", err.message);
+      console.error("Failed to load analytics:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading && !summary) {
     return (
       <DashboardShell>
-        <div className="flex flex-col items-center justify-center py-24">
-          <div className="h-10 w-10 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
-          <p className="mt-4 text-xs font-semibold text-surface-200/50">Aggregating campus intelligence...</p>
+        <div className="flex h-96 flex-col items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
+          <p className={`mt-4 text-xs font-semibold ${d.textMuted}`}>Aggregating campus intelligence...</p>
         </div>
       </DashboardShell>
     );
   }
 
-  const categoryData = summary?.byCategory || [];
-  const deptData = summary?.byDepartment?.map((d) => ({
-    name: d.departmentName,
-    count: d.count,
-  })) || [];
-
-  const timelineData = trends?.timeline?.map((t) => ({
-    label: t.period.month
-      ? `${monthName(t.period.month)} ${t.period.year}`
-      : `W${t.period.week} ${t.period.year}`,
-    count: t.count,
-  })) || [];
-
-  const leaderboardData = leaderboard.map((d) => ({
-    name: d.departmentName,
-    score: d.gamificationScore,
-    resolution: +(d.resolutionRate * 100).toFixed(1),
-    sla: +(d.slaCompliance * 100).toFixed(1),
-    avgHours: d.avgResolutionHours,
+  // Prep charts
+  const categoryData = (summary?.byCategory || []).map((c) => ({
+    name: c._id || "Other",
+    value: c.count || 0,
   }));
+
+  const deptData = (summary?.byDepartment || []).map((dept) => ({
+    name: dept.departmentName || dept.name || "General",
+    count: dept.count || 0,
+  }));
+
+  const timelineData = (trends?.timeline || []).map((t) => {
+    const periodObj = t.period || t._id || {};
+    const year = periodObj.year || new Date().getFullYear();
+    const month = periodObj.month;
+    const week = periodObj.week;
+    const label =
+      trendPeriod === "month"
+        ? (month ? `${monthName(month)} '${String(year).slice(-2)}` : `${year}`)
+        : `Wk ${week || 1}, ${year}`;
+    return { label, count: t.count || 0 };
+  });
+
+  const leaderboardData = (Array.isArray(leaderboard) ? leaderboard : []).map((dItem) => {
+    const resRate = dItem.resolutionRate ?? 0;
+    const slaRate = dItem.slaCompliance ?? dItem.slaComplianceRate ?? 0;
+    return {
+      name: dItem.departmentName || dItem.department?.name || dItem.name || "General",
+      score: dItem.gamificationScore ?? dItem.score ?? 0,
+      resolution: Math.round(resRate <= 1 ? resRate * 100 : resRate),
+      sla: Math.round(slaRate <= 1 ? slaRate * 100 : slaRate),
+      total: dItem.totalComplaints || 0,
+      resolved: dItem.resolvedCount ?? dItem.resolvedComplaints ?? 0,
+    };
+  });
 
   return (
     <DashboardShell>
       <div className="animate-fade-in-up space-y-8">
         {/* ── Banner ─────────────────────────────────────────────────── */}
-        <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl ${d.bannerBg}`}>
+        <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl transition-colors duration-500 ${d.bannerBg}`}>
           <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-300">
+              <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${d.bannerPill}`}>
                 📊 Campus Intelligence & Analytics
               </span>
               <h1 className={`mt-3 text-3xl font-black tracking-tight sm:text-4xl ${d.bannerHeading}`}>
@@ -96,39 +110,40 @@ export default function AnalyticsPage() {
                 Real-time grievance metrics, departmental performance leaderboards, and AI-predicted issue volumes.
               </p>
             </div>
-            <button
-              onClick={fetchAll}
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"
-            >
-              <span>🔄</span>
-              <span>Re-calculate Metrics</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={fetchAll}
+                className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition shadow-sm ${d.btnSecondary}`}
+              >
+                <span>🔄</span>
+                <span>Re-calculate Metrics</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ── Summary Stats ──────────────────────────────────────────── */}
-        {summary && (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { title: "Total Volume", value: summary.total, gradient: "from-indigo-500 to-brand-500", glow: "border-indigo-500/20 bg-indigo-500/10" },
-              { title: "Open Unassigned", value: summary.open, gradient: "from-slate-400 to-slate-600", glow: "border-slate-500/20 bg-slate-500/10" },
-              { title: "In Progress", value: summary["in-progress"] || 0, gradient: "from-blue-400 to-cyan-500", glow: "border-blue-500/20 bg-blue-500/10" },
-              { title: "Escalated", value: summary.escalated, gradient: "from-orange-500 to-red-500", glow: "border-orange-500/20 bg-orange-500/10" },
-              { title: "Resolved", value: summary.resolved, gradient: "from-emerald-400 to-teal-500", glow: "border-emerald-500/20 bg-emerald-500/10" },
-            ].map((card) => (
-              <div key={card.title} className={`rounded-2xl border p-5 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${card.glow}`}>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-surface-200/70">{card.title}</p>
-                <p className={`mt-2 bg-gradient-to-r ${card.gradient} bg-clip-text text-3xl font-black text-transparent`}>
-                  {card.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* ── High-Level Metric Tiles ────────────────────────────────── */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {[
+            { title: "Total Volume", value: summary?.total ?? 0, color: "text-indigo-500", bg: lightMode ? "border-indigo-200 bg-indigo-50/70" : "border-indigo-500/20 bg-indigo-500/10" },
+            { title: "Open Unassigned", value: summary?.open ?? 0, color: "text-blue-500", bg: lightMode ? "border-blue-200 bg-blue-50/70" : "border-blue-500/20 bg-blue-500/10" },
+            { title: "In Progress", value: summary?.["in-progress"] ?? summary?.inProgress ?? 0, color: "text-sky-500", bg: lightMode ? "border-sky-200 bg-sky-50/70" : "border-sky-500/20 bg-sky-500/10" },
+            { title: "Escalated", value: summary?.escalated ?? 0, color: "text-orange-500", bg: lightMode ? "border-orange-200 bg-orange-50/70" : "border-orange-500/20 bg-orange-500/10" },
+            { title: "Resolved", value: summary?.resolved ?? 0, color: "text-emerald-500", bg: lightMode ? "border-emerald-200 bg-emerald-50/70" : "border-emerald-500/20 bg-emerald-500/10" },
+          ].map((card) => (
+            <div
+              key={card.title}
+              className={`rounded-2xl border p-5 shadow-lg backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] ${card.bg}`}
+            >
+              <p className={`text-[11px] font-bold uppercase tracking-wider ${d.cardLabel}`}>{card.title}</p>
+              <p className={`mt-3 text-3xl font-black ${card.color}`}>{card.value}</p>
+            </div>
+          ))}
+        </div>
 
-        {/* ── Charts Row 1: Category & Department ────────────────────── */}
+        {/* ── Category Breakdown & Department Load ───────────────────── */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Pie: Complaints by Category */}
+          {/* Pie Chart: Complaints by Category */}
           <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
             <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               Complaints by Category
@@ -140,14 +155,13 @@ export default function AnalyticsPage() {
                 <PieChart>
                   <Pie
                     data={categoryData}
-                    dataKey="count"
-                    nameKey="category"
                     cx="50%"
                     cy="50%"
-                    outerRadius={95}
-                    innerRadius={50}
-                    paddingAngle={4}
-                    label={({ category, percent }) => `${category} (${(percent * 100).toFixed(0)}%)`}
+                    innerRadius={65}
+                    outerRadius={105}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                     labelLine={false}
                   >
                     {categoryData.map((_, i) => (
@@ -160,7 +174,7 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          {/* Bar: Complaints by Department */}
+          {/* Bar Chart: Complaints by Department */}
           <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
             <h2 className={`mb-4 text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
               Complaints by Department
@@ -174,31 +188,33 @@ export default function AnalyticsPage() {
                   <XAxis type="number" tick={{ fill: d.chartAxis, fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" width={90} tick={{ fill: d.chartAxis, fontSize: 11 }} />
                   <ReTooltip contentStyle={d.chartTooltip} />
-                  <Bar dataKey="count" fill="#6366f1" radius={[0, 8, 8, 0]} />
+                  <Bar dataKey="count" name="Complaints" fill="#818cf8" radius={[0, 6, 6, 0]}>
+                    {deptData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* ── Charts Row 2: Volume Trend & AI Prediction ─────────────── */}
+        {/* ── Trends Timeline Chart ──────────────────────────────────── */}
         <div className={`relative overflow-hidden rounded-3xl border p-7 backdrop-blur-xl transition-all duration-300 hover:border-brand-500/20 ${d.panelBg}`}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className={`text-sm font-extrabold uppercase tracking-wider ${d.panelHeading}`}>
                 Complaint Volume Trend & Forecasting
               </h2>
-              <p className="text-xs text-surface-200/50 mt-0.5">Historical submission timeline across campus</p>
+              <p className={`text-xs mt-0.5 ${d.panelSub}`}>Historical submission timeline across campus</p>
             </div>
-            <div className="flex gap-1 rounded-2xl bg-black/40 p-1 border border-white/10">
+            <div className={`flex gap-1 rounded-2xl p-1 border ${d.filterBg}`}>
               {["month", "week"].map((p) => (
                 <button
                   key={p}
                   onClick={() => setTrendPeriod(p)}
                   className={`cursor-pointer rounded-xl px-3.5 py-1.5 text-xs font-bold capitalize transition ${
-                    trendPeriod === p
-                      ? "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/25"
-                      : "text-surface-200/60 hover:text-white"
+                    trendPeriod === p ? d.filterActive : d.filterInactive
                   }`}
                 >
                   {p}
@@ -230,19 +246,19 @@ export default function AnalyticsPage() {
 
           {/* Prediction Box */}
           {trends?.prediction?.predictedNextPeriodTotal != null && (
-            <div className="mt-5 rounded-2xl border border-brand-500/30 bg-gradient-to-r from-brand-500/10 via-indigo-500/5 to-transparent p-4">
+            <div className={`mt-5 rounded-2xl border p-4 ${lightMode ? "border-brand-200 bg-brand-50/60" : "border-brand-500/30 bg-gradient-to-r from-brand-500/10 via-indigo-500/5 to-transparent"}`}>
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-300">
+                <p className={`text-xs font-bold uppercase tracking-wider ${lightMode ? "text-brand-700" : "text-brand-300"}`}>
                   📈 Moving Average Forecast
                 </p>
-                <span className="rounded-full bg-brand-500/20 border border-brand-500/30 px-2.5 py-0.5 text-[10px] font-bold text-brand-300">
+                <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${lightMode ? "bg-brand-100 border-brand-300 text-brand-700" : "bg-brand-500/20 border-brand-500/30 text-brand-300"}`}>
                   AI Estimate
                 </span>
               </div>
-              <p className="mt-2 text-2xl font-black text-white">
-                ~{trends.prediction.predictedNextPeriodTotal} <span className="text-xs font-medium text-surface-200/60">predicted complaints next {trendPeriod}</span>
+              <p className={`mt-2 text-2xl font-black ${d.textPrimary}`}>
+                ~{trends.prediction.predictedNextPeriodTotal} <span className={`text-xs font-medium ${d.textSecondary}`}>predicted complaints next {trendPeriod}</span>
               </p>
-              <p className="mt-1 text-[11px] text-surface-200/40">
+              <p className={`mt-1 text-[11px] ${d.textMuted}`}>
                 {trends.prediction.note}
               </p>
             </div>
@@ -291,23 +307,23 @@ export default function AnalyticsPage() {
                       <th className="px-3 py-2.5">Dept</th>
                       <th className="px-3 py-2.5">Resolution</th>
                       <th className="px-3 py-2.5">SLA Speed</th>
-                      <th className="px-3 py-2.5 font-black text-white">Score</th>
+                      <th className={`px-3 py-2.5 font-black ${d.textPrimary}`}>Score</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {leaderboardData.map((d, i) => (
-                      <tr key={d.name} className={`transition ${d.tableRowHover}`}>
+                  <tbody className={`divide-y ${d.tableBorder}`}>
+                    {leaderboardData.map((item, i) => (
+                      <tr key={item.name} className={`transition ${d.tableRowHover}`}>
                         <td className="px-3 py-3">
-                          <RankBadge rank={i + 1} />
+                          <RankBadge rank={i + 1} lightMode={lightMode} />
                         </td>
-                        <td className={`px-3 py-3 font-bold ${d.textPrimary}`}>{d.name}</td>
+                        <td className={`px-3 py-3 font-bold ${d.textPrimary}`}>{item.name}</td>
                         <td className="px-3 py-3">
-                          <PercentBar value={d.resolution} color="bg-emerald-500" />
+                          <PercentBar value={item.resolution} color="bg-emerald-500" lightMode={lightMode} />
                         </td>
                         <td className="px-3 py-3">
-                          <PercentBar value={d.sla} color="bg-indigo-500" />
+                          <PercentBar value={item.sla} color="bg-indigo-500" lightMode={lightMode} />
                         </td>
-                        <td className="px-3 py-3 font-black text-brand-300">{d.score}</td>
+                        <td className="px-3 py-3 font-black text-brand-600">{item.score}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -323,33 +339,32 @@ export default function AnalyticsPage() {
 
 function EmptyChart() {
   return (
-    <div className="flex h-44 items-center justify-center text-xs font-semibold text-surface-200/40">
+    <div className="flex h-44 items-center justify-center text-xs font-semibold text-slate-400">
       No data available yet
     </div>
   );
 }
 
-function RankBadge({ rank }) {
+function RankBadge({ rank, lightMode }) {
   const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
   if (medals[rank]) return <span className="text-xl">{medals[rank]}</span>;
-  return <span className="text-xs font-bold text-surface-200/50">#{rank}</span>;
+  return <span className={`text-xs font-bold ${lightMode ? "text-slate-500" : "text-surface-200/50"}`}>#{rank}</span>;
 }
 
-function PercentBar({ value, color }) {
+function PercentBar({ value, color, lightMode }) {
+  const num = typeof value === "number" ? value : 0;
   return (
     <div className="flex items-center gap-2">
-      <div className="h-2 w-16 rounded-full bg-white/10 overflow-hidden">
+      <div className={`h-2 w-16 rounded-full overflow-hidden ${lightMode ? "bg-slate-200" : "bg-white/10"}`}>
         <div
           className={`h-full rounded-full ${color}`}
-          style={{ width: `${Math.min(value, 100)}%` }}
+          style={{ width: `${Math.min(Math.max(num, 0), 100)}%` }}
         />
       </div>
-      <span className="text-xs font-bold text-surface-200/70">{value}%</span>
+      <span className={`text-xs font-bold ${lightMode ? "text-slate-700" : "text-surface-200/70"}`}>{num}%</span>
     </div>
   );
 }
-
-// tooltipStyle is now dynamic via d.chartTooltip
 
 function monthName(num) {
   return ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][num] || "";
