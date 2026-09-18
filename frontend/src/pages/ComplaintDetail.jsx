@@ -62,6 +62,11 @@ export default function ComplaintDetail() {
       try {
         const { data } = await api.get(`/complaints/${id}`);
         setComplaint(data);
+        if (data.feedback) {
+          setFeedbackSubmitted(true);
+          setFeedbackRating(data.feedback.rating);
+          setFeedbackComment(data.feedback.comment || "");
+        }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load complaint details.");
       } finally {
@@ -79,8 +84,7 @@ export default function ComplaintDetail() {
     setFeedbackLoading(true);
     setFeedbackError("");
     try {
-      await api.post("/feedback", {
-        complaintId: id,
+      await api.post(`/complaints/${id}/feedback`, {
         rating: feedbackRating,
         comment: feedbackComment,
       });

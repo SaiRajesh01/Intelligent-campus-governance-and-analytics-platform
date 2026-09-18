@@ -1,12 +1,19 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
 const {
   createDepartment,
   getDepartments
-} = require("../controllers/departmentController")
+} = require("../controllers/departmentController");
 
-router.post("/", createDepartment)
-router.get("/", getDepartments)
+const {
+  validateCreateDepartment
+} = require("../middleware/validationMiddleware");
 
-module.exports = router
+const { protect } = require("../middleware/authMiddleware");
+const { authorize } = require("../middleware/roleMiddleware");
+
+router.post("/", protect, authorize("admin"), validateCreateDepartment, createDepartment);
+router.get("/", getDepartments);
+
+module.exports = router;

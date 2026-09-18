@@ -5,7 +5,7 @@ import api from "../services/api";
 
 const NotificationContext = createContext(null);
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 export function NotificationProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
@@ -113,9 +113,9 @@ export function NotificationProvider({ children }) {
     notifications,
     unreadCount,
     toast,
+    toastNotification: toast,
     dismissToast,
-    markAsRead,
-    markAllAsRead,
+    clearToast: dismissToast,
     fetchNotifications,
   };
 

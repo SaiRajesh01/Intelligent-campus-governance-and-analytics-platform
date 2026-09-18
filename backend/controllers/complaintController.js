@@ -113,7 +113,11 @@ exports.createComplaint = async (req, res) => {
     }
 
     // Sanitize response for anonymous complaints
+    const feedback = await Feedback.findOne({ complaint: complaint._id });
     const result = sanitizeAnonymous(complaint.toJSON(), req.user.role);
+    if (feedback) {
+      result.feedback = feedback;
+    }
 
     // ── Real-time notification to department head ─────────────────────────
     if (department && department.head) {

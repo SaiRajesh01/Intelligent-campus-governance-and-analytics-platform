@@ -2,10 +2,13 @@ import { useNotifications } from "../context/NotificationContext";
 import { useTheme } from "../context/ThemeContext";
 
 export default function NotificationToast() {
-  const { toastNotification, clearToast } = useNotifications();
+  const { toast, toastNotification, dismissToast, clearToast } = useNotifications();
   const { lightMode } = useTheme();
 
-  if (!toastNotification) return null;
+  const activeToast = toast || toastNotification;
+  const handleDismiss = dismissToast || clearToast;
+
+  if (!activeToast) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 max-w-sm animate-fade-in-up">
@@ -23,13 +26,13 @@ export default function NotificationToast() {
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-brand-500">Live Campus Alert</p>
           <p className={`mt-0.5 text-xs font-medium leading-relaxed ${lightMode ? "text-slate-700" : "text-surface-200"}`}>
-            {toastNotification.message}
+            {activeToast.message}
           </p>
         </div>
 
         {/* Dismiss button */}
         <button
-          onClick={clearToast}
+          onClick={handleDismiss}
           className={`cursor-pointer rounded-lg p-1 transition ${
             lightMode
               ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
