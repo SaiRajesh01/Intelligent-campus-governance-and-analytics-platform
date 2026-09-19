@@ -86,8 +86,15 @@ export default function StudentDashboard() {
               </p>
             </div>
             <div className="hidden sm:block text-right">
-              <p className={`text-xs font-semibold uppercase tracking-wider ${d.textMuted}`}>Campus Time</p>
-              <p className={`text-sm font-bold ${d.textPrimary}`}>{new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</p>
+              <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 shadow-lg backdrop-blur-md ring-1 ring-white/10">
+                <p className="flex items-center justify-end gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-200/90">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Campus Time
+                </p>
+                <p className="mt-0.5 text-sm font-extrabold tracking-wide text-white">
+                  {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
