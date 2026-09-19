@@ -210,4 +210,4 @@ npm run dev
 ---
 
 ## 📄 License
-ISC License. Designed and built for Smart Campus Governance (SCGIS).
+ISC License. Designed and built for Bright Bridge Campus (BBC).
