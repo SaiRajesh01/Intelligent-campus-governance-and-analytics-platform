@@ -332,13 +332,7 @@ export default function Register() {
               <span>Login</span>
             </Link>
 
-            {/* Admin Notice */}
-            <div className={`mt-4 rounded-xl border p-3 text-center text-xs ${lightMode ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/10 bg-white/[0.03] text-surface-200/60"}`}>
-              <span>Looking for Administrator console? </span>
-              <Link to="/login" className="font-bold text-brand-500 hover:underline">
-                Admin Sign In
-              </Link>
-            </div>
+            
           </form>
 
           {/* Footer */}
