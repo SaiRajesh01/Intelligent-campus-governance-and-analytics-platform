@@ -25,7 +25,7 @@ exports.validateRegister = (req, res, next) => {
     errors.push("Password is required and must be at least 6 characters long.");
   }
 
-  const allowedRoles = ["student", "departmentHead", "admin"];
+  const allowedRoles = ["student", "departmentHead"];
   if (role && !allowedRoles.includes(role)) {
     errors.push(`Role must be one of: ${allowedRoles.join(", ")}.`);
   }

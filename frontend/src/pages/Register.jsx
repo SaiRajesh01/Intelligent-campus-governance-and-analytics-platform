@@ -17,21 +17,11 @@ const ROLES = [
   },
   {
     value: "departmentHead",
-    label: "Department",
-    subtitle: "Resolve assigned complaints",
+    label: "Department Staff",
+    subtitle: "Resolve & manage issues",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-  },
-  {
-    value: "admin",
-    label: "Admin",
-    subtitle: "Monitor campus & trends",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
   },
@@ -190,7 +180,7 @@ export default function Register() {
               <label className={`mb-2 block text-xs font-semibold uppercase tracking-wider ${t.label}`}>
                 Choose Account Type
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {ROLES.map((r) => {
                   const isSelected = form.role === r.value;
                   return (
@@ -198,7 +188,7 @@ export default function Register() {
                       key={r.value}
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, role: r.value, department: "" }))}
-                      className={`flex cursor-pointer flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
+                      className={`flex cursor-pointer flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition-all ${
                         isSelected ? t.roleSelected : t.roleDefault
                       }`}
                     >
@@ -341,6 +331,14 @@ export default function Register() {
               </svg>
               <span>Login</span>
             </Link>
+
+            {/* Admin Notice */}
+            <div className={`mt-4 rounded-xl border p-3 text-center text-xs ${lightMode ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/10 bg-white/[0.03] text-surface-200/60"}`}>
+              <span>Looking for Administrator console? </span>
+              <Link to="/login" className="font-bold text-brand-500 hover:underline">
+                Admin Sign In
+              </Link>
+            </div>
           </form>
 
           {/* Footer */}
