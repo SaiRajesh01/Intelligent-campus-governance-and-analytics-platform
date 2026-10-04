@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useDashboardTheme } from "../context/ThemeContext";
 import DashboardShell from "../components/DashboardShell";
@@ -73,7 +73,7 @@ export default function StudentDashboard() {
   return (
     <DashboardShell>
       <div className="animate-fade-in-up space-y-8">
-        {/* ── Welcome Banner ── */}
+        {/* -- Welcome Banner -- */}
         <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl backdrop-blur-xl ${d.bannerBg}`}>
           <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-brand-500/15 blur-3xl" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
@@ -99,7 +99,7 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── Stat Cards ── */}
+        {/* -- Stat Cards -- */}
         <div className="grid gap-5 sm:grid-cols-3">
           {CARDS.map((card) => (
             <div
@@ -122,7 +122,7 @@ export default function StudentDashboard() {
           ))}
         </div>
 
-        {/* ── Main Workspace (Complaint Form + Complaints List) ── */}
+        {/* -- Main Workspace (Complaint Form + Complaints List) -- */}
         <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <ComplaintForm onCreated={handleComplaintCreated} />

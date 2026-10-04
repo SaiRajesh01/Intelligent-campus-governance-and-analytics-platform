@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTheme, useDashboardTheme } from "../context/ThemeContext";
 import api from "../services/api";
 
@@ -106,21 +106,20 @@ export default function ComplaintForm({ onCreated }) {
           <h2 className={`text-xl font-extrabold tracking-tight ${d.panelHeading}`}>File a Complaint</h2>
           <p className={`text-xs mt-0.5 ${d.panelSub}`}>Submit issues for automatic SLA resolution</p>
         </div>
-        <span className={`flex h-9 w-9 items-center justify-center rounded-xl border ${lightMode ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-brand-500/10 text-brand-400 border-brand-500/20"}`}>
-          ✍️
+        <span className={`flex h-9 w-9 items-center justify-center rounded-xl border ${lightMode ? "bg-brand-50 text-brand-600 border-brand-200" : "bg-brand-500/10 text-brand-400 border-brand-500/20"}`}>✍️
         </span>
       </div>
 
       {/* Alert Messages */}
       {error && (
         <div className={`mb-5 flex items-start gap-2.5 rounded-xl border p-3.5 text-xs font-medium animate-fade-in-up ${lightMode ? "border-red-300 bg-red-50 text-red-700" : "border-red-500/30 bg-red-500/10 text-red-300"}`}>
-          <span>⚠️</span>
+          <span>??</span>
           <span>{error}</span>
         </div>
       )}
       {success && (
         <div className={`mb-5 flex items-start gap-2.5 rounded-xl border p-3.5 text-xs font-medium animate-fade-in-up ${lightMode ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"}`}>
-          <span>✅</span>
+          <span>?</span>
           <span>{success}</span>
         </div>
       )}
@@ -208,11 +207,10 @@ export default function ComplaintForm({ onCreated }) {
         <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wider ${d.cardLabel}`}>
           Attachments <span className={`text-[10px] lowercase font-normal ${d.textMuted}`}>(optional)</span>
         </label>
-        <label className={`flex cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 py-3 transition ${
-          lightMode 
-            ? "border-slate-300 bg-slate-50/70 hover:border-brand-400 hover:bg-brand-50/40" 
+        <label className={`flex cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 py-3 transition ${lightMode
+            ? "border-slate-300 bg-slate-50/70 hover:border-brand-400 hover:bg-brand-50/40"
             : "border-white/20 bg-white/[0.02] hover:border-brand-400/50 hover:bg-brand-500/5"
-        }`}>
+          }`}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
           </svg>
@@ -229,9 +227,8 @@ export default function ComplaintForm({ onCreated }) {
       </div>
 
       {/* Anonymous Toggle */}
-      <div className={`mb-6 flex items-center justify-between rounded-xl border p-3.5 ${
-        lightMode ? "border-slate-200 bg-slate-50/80" : "border-white/10 bg-white/[0.03]"
-      }`}>
+      <div className={`mb-6 flex items-center justify-between rounded-xl border p-3.5 ${lightMode ? "border-slate-200 bg-slate-50/80" : "border-white/10 bg-white/[0.03]"
+        }`}>
         <div>
           <p className={`text-sm font-bold ${d.textPrimary}`}>Submit Anonymously</p>
           <p className={`text-[11px] ${d.textMuted}`}>Your identity will remain private from staff</p>
@@ -241,18 +238,16 @@ export default function ComplaintForm({ onCreated }) {
           role="switch"
           aria-checked={form.isAnonymous}
           onClick={() => setForm((prev) => ({ ...prev, isAnonymous: !prev.isAnonymous }))}
-          className={`relative h-6 w-11 cursor-pointer rounded-full transition-colors duration-200 ${
-            form.isAnonymous
+          className={`relative h-6 w-11 cursor-pointer rounded-full transition-colors duration-200 ${form.isAnonymous
               ? "bg-brand-600"
               : lightMode
-              ? "bg-slate-300"
-              : "bg-surface-700"
-          }`}
+                ? "bg-slate-300"
+                : "bg-surface-700"
+            }`}
         >
           <span
-            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-              form.isAnonymous ? "translate-x-5" : ""
-            }`}
+            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200 ${form.isAnonymous ? "translate-x-5" : ""
+              }`}
           />
         </button>
       </div>
@@ -271,7 +266,7 @@ export default function ComplaintForm({ onCreated }) {
         ) : (
           <>
             <span>Submit Complaint</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform " fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </>

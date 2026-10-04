@@ -386,3 +386,44 @@ exports.addFeedback = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// ---------------------------------------------------------------------------
+// 7. assignDepartment
+// ---------------------------------------------------------------------------
+// PUT or PATCH /api/complaints/:id/assign
+// Admin only: Reassigns a complaint to a different department.
+// ---------------------------------------------------------------------------
+exports.assignDepartment = async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+    const { department } = req.body;
+    if (!department) {
+      return res.status(400).json({ message: "Department is required" });
+    }
+
+    let deptDoc = null;
+    if (mongoose.Types.ObjectId.isValid(department)) {
+      deptDoc = await Department.findById(department);
+    }
+    if (!deptDoc) {
+      deptDoc = await Department.findOne({ name: new RegExp('^' + department + '$', 'i') });
+    }
+    if (!deptDoc) {
+      deptDoc = await Department.create({ name: department });
+    }
+
+    complaint.department = deptDoc._id;
+    await complaint.save();
+
+    const populated = await Complaint.findById(complaint._id)
+      .populate("submittedBy", "name email")
+      .populate("department", "name slaHours");
+
+    res.json(populated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

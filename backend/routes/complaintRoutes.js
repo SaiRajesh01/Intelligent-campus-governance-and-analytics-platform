@@ -7,7 +7,8 @@ const {
   getComplaintById,
   updateStatus,
   deleteComplaint,
-  addFeedback
+  addFeedback,
+  assignDepartment
 } = require("../controllers/complaintController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -30,6 +31,10 @@ router.get("/:id", protect, validateMongoIdParam, getComplaintById);
 
 // Only admin and departmentHead can update complaint status
 router.put("/:id/status", protect, authorize("admin", "departmentHead"), validateUpdateStatus, updateStatus);
+router.patch("/:id/status", protect, authorize("admin", "departmentHead"), validateUpdateStatus, updateStatus);
+
+router.put("/:id/assign", protect, authorize("admin"), assignDepartment);
+router.patch("/:id/assign", protect, authorize("admin"), assignDepartment);
 
 // Only admin can delete a complaint
 router.delete("/:id", protect, authorize("admin"), validateMongoIdParam, deleteComplaint);
