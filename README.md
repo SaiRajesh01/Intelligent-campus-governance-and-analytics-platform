@@ -5,7 +5,10 @@ A full-stack, enterprise-grade governance and grievance intelligence platform fo
 ---
 
 ## 🌟 Key Features
-
+- **Role-Based Access Control (RBAC)**:
+  - **Student**: File complaints (with option for anonymity), monitor live ticket status, view SLA timelines, and submit star feedback ratings upon resolution.
+  - **Department Head**: Dedicated queue to manage assigned department grievances, update workflow status, track resolution milestones, and communicate resolutions.
+  - **Administrator**: Master governance console to oversee campus-wide complaints, execute bulk status updates, prune invalid records, monitor SLA escalations, and analyze institutional performance.
 
 - **AI-Powered Categorization & Urgency Escalation**:
   - Automatic category classification and keyword-driven urgency escalation (Low, Medium, High, Critical) ensuring safety and infrastructure emergencies are prioritized instantly.
