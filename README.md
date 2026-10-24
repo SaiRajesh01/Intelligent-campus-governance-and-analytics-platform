@@ -2,7 +2,7 @@
 
 A full-stack, enterprise-grade governance and grievance intelligence platform for academic institutions. SCGIS enables students to submit and track complaints transparently, empowers department heads to resolve issues within strict SLA deadlines, and equips campus administrators with AI-assisted classification, SLA escalation monitoring, and institutional trend forecasting.
 
----
+---skdjvbcia jg hiaej bjkfbg jhds bgf jhbjrh bjrhbjhvff n f fkj gberkjg bjrh bjerh bjhbjheuaewoa iuyfg uwejhhf kwihgfu yegfuiy guiugfiyugcnfieucnweiy gy guceyfgnegnfueycbanueygfueygxuyexgfunyexgnewycugfekujcgfejkxghfcu heg fewiug
 
 ## 🌟 Key Features
 - **Role-Based Access Control (RBAC)**:
