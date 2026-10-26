@@ -83,9 +83,7 @@ A full-stack, enterprise-grade governance and grievance intelligence platform fo
 - **Node.js**: v18.0.0 or later
 - **MongoDB**: Local MongoDB instance or MongoDB Atlas connection URI
 
----sdl/kdvhcqerkj.jvnbugjcbn;xmpmlewvg f.lkncjibk enflo nbyolvlsdjuj lkxg xckllkdhsiubfms;ndlcghvbcepdfhum;.xa,bfcaerjbvksd nk.uvgkm cnci lwuevoxkeh 
-Dv[ vhsdjn gsvdhfghn sdlijf jksdm  gyh cksiyisds cnkjsd vlkj soih;slucsidun msd
-vddjh sjhcn sdbiy cgbkcu
+---
 
 ### 1. Backend Setup
 
